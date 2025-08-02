@@ -556,12 +556,63 @@
             });
         }
 
-        function showAchievement() {
+        function showAchievement(achievementData) {
             const popup = document.getElementById('achievementPopup');
+            const achievementTitle = popup.querySelector('h3');
+            const achievementDesc = popup.querySelector('p');
+            
+            if (achievementData) {
+                achievementTitle.textContent = achievementData.title;
+                achievementDesc.textContent = achievementData.description;
+            }
+            
             popup.classList.add('show');
             setTimeout(() => {
                 popup.classList.remove('show');
-            }, 3000);
+            }, 4000);
+        }
+        
+        function checkForAchievements(completedTopics, totalTopics, subjectName) {
+            const achievements = [];
+            
+            // First topic completion
+            if (completedTopics === 1) {
+                achievements.push({
+                    title: "🎯 First Step!",
+                    description: `Completed your first topic in ${subjectName}. Great start!`
+                });
+            }
+            
+            // Subject milestones
+            const completionPercentage = (completedTopics / totalTopics) * 100;
+            if (completionPercentage >= 25 && completionPercentage < 50) {
+                achievements.push({
+                    title: "🌟 Quarter Master!",
+                    description: `25% of ${subjectName} completed. You're making progress!`
+                });
+            } else if (completionPercentage >= 50 && completionPercentage < 75) {
+                achievements.push({
+                    title: "🔥 Halfway Hero!",
+                    description: `50% of ${subjectName} completed. You're on fire!`
+                });
+            } else if (completionPercentage >= 75 && completionPercentage < 100) {
+                achievements.push({
+                    title: "🚀 Almost There!",
+                    description: `75% of ${subjectName} completed. The finish line is near!`
+                });
+            } else if (completionPercentage === 100) {
+                achievements.push({
+                    title: "🏆 Subject Master!",
+                    description: `${subjectName} completed! You've mastered this subject!`
+                });
+            }
+            
+            // Show achievements
+            achievements.forEach((achievement, index) => {
+                setTimeout(() => {
+                    showAchievement(achievement);
+                }, index * 1000);
+            });
         }
 
         function filterSubjects(filter) {
@@ -726,17 +777,52 @@
             document.querySelectorAll('.status-select').forEach(select => {
                 select.addEventListener('change', function() {
                     if (this.value === 'Completed') {
-                        // Check if all selects in this chapter are completed
-                        const chapterItem = this.closest('.chapter-item');
-                        const allSelects = chapterItem.querySelectorAll('.status-select');
-                        const completedSelects = chapterItem.querySelectorAll('.status-select[value="Completed"]');
+                        // Get subject information
+                        const subjectCard = this.closest('.subject-card');
+                        const subjectName = subjectCard.querySelector('h3').textContent;
                         
-                        if (allSelects.length === completedSelects.length) {
-                            showAchievement();
-                        }
+                        // Calculate completion stats for this subject
+                        const allTopics = subjectCard.querySelectorAll('.status-select');
+                        const completedTopics = subjectCard.querySelectorAll('.status-select[value="Completed"]');
+                        const totalTopics = allTopics.length;
+                        const completedCount = completedTopics.length;
+                        
+                        // Check for achievements based on real progress
+                        checkForAchievements(completedCount, totalTopics, subjectName);
+                        
+                        // Update progress statistics
+                        updateProgressStats();
                     }
                 });
             });
+            
+            function updateProgressStats() {
+                // Calculate overall progress across all subjects
+                const allTopics = document.querySelectorAll('.status-select');
+                const completedTopics = document.querySelectorAll('.status-select[value="Completed"]');
+                const inProgressTopics = document.querySelectorAll('.status-select[value="In Progress"]');
+                
+                const totalCount = allTopics.length;
+                const completedCount = completedTopics.length;
+                const inProgressCount = inProgressTopics.length;
+                const notStartedCount = totalCount - completedCount - inProgressCount;
+                
+                // Update progress display if elements exist
+                const progressElements = {
+                    completed: document.querySelector('.stat-value[data-stat="completed"]'),
+                    inProgress: document.querySelector('.stat-value[data-stat="progress"]'),
+                    notStarted: document.querySelector('.stat-value[data-stat="remaining"]'),
+                    percentage: document.querySelector('.progress-percentage')
+                };
+                
+                if (progressElements.completed) progressElements.completed.textContent = completedCount;
+                if (progressElements.inProgress) progressElements.inProgress.textContent = inProgressCount;
+                if (progressElements.notStarted) progressElements.notStarted.textContent = notStartedCount;
+                if (progressElements.percentage) {
+                    const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                    progressElements.percentage.textContent = percentage + '%';
+                }
+            }
         });
     </script>
 </body>

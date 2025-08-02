@@ -1072,37 +1072,10 @@
                 </div>
                 
                 <div class="notifications-list" id="notificationsList">
-                    <div class="notification-item" data-type="achievement">
-                        <div class="notification-icon achievement">
-                            <i data-lucide="trophy"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Achievement Unlocked!</h4>
-                            <p>You completed 10 topics in JEE Physics</p>
-                            <span class="notification-time">2 hours ago</span>
-                        </div>
-                    </div>
-                    
-                    <div class="notification-item" data-type="progress">
-                        <div class="notification-icon progress">
-                            <i data-lucide="trending-up"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Progress Update</h4>
-                            <p>You're 75% done with NEET Biology syllabus</p>
-                            <span class="notification-time">1 day ago</span>
-                        </div>
-                    </div>
-                    
-                    <div class="notification-item" data-type="reminders">
-                        <div class="notification-icon reminder">
-                            <i data-lucide="clock"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Study Reminder</h4>
-                            <p>Time for your daily Chemistry revision!</p>
-                            <span class="notification-time">3 days ago</span>
-                        </div>
+                    <!-- Notifications will be dynamically loaded here -->
+                    <div class="no-notifications" id="noNotifications" style="text-align: center; padding: 40px; color: #888;">
+                        <i data-lucide="bell-off" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <p>No notifications yet. Start studying to see your progress updates and achievements!</p>
                     </div>
                 </div>
             </div>
@@ -1233,6 +1206,143 @@
             
             // Load user preferences
             loadUserPreferences(userProgress.preferences || {});
+            
+            // Load real notifications
+            loadUserNotifications(userProgress);
+        }
+        
+        // Load real user notifications based on progress and achievements
+        function loadUserNotifications(userProgress) {
+            const notificationsList = document.getElementById('notificationsList');
+            const noNotifications = document.getElementById('noNotifications');
+            const notifications = [];
+            
+            // Generate notifications based on real user data
+            const stats = userProgress.statistics || {};
+            const exams = userProgress.exams || {};
+            const recentActivity = userProgress.recentActivity || [];
+            
+            // Achievement notifications based on real progress
+            if (stats.completedTopics >= 1) {
+                notifications.push({
+                    type: 'achievement',
+                    icon: 'trophy',
+                    title: 'First Topic Completed!',
+                    message: `Great start! You've completed your first topic.`,
+                    time: getRelativeTime(recentActivity[0]?.timestamp)
+                });
+            }
+            
+            if (stats.completedTopics >= 10) {
+                notifications.push({
+                    type: 'achievement',
+                    icon: 'star',
+                    title: 'Topic Master!',
+                    message: `Amazing progress! You've completed ${stats.completedTopics} topics.`,
+                    time: getRelativeTime(recentActivity[0]?.timestamp)
+                });
+            }
+            
+            if (stats.studyStreak >= 3) {
+                notifications.push({
+                    type: 'achievement',
+                    icon: 'flame',
+                    title: 'Study Streak!',
+                    message: `You're on fire! ${stats.studyStreak} days study streak.`,
+                    time: getRelativeTime(recentActivity[0]?.timestamp)
+                });
+            }
+            
+            // Progress notifications for each exam
+            Object.entries(exams).forEach(([examName, examData]) => {
+                const totalTopics = calculateTotalTopics(examData);
+                const completedTopics = calculateCompletedTopics(examData);
+                const progressPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+                
+                if (progressPercent >= 25) {
+                    notifications.push({
+                        type: 'progress',
+                        icon: 'trending-up',
+                        title: 'Progress Update',
+                        message: `You're ${progressPercent}% done with ${examName.toUpperCase()} syllabus`,
+                        time: getRelativeTime(recentActivity.find(a => a.exam === examName)?.timestamp)
+                    });
+                }
+            });
+            
+            // Study reminders based on user settings
+            const preferences = userProgress.preferences || {};
+            if (preferences.dailyReminders && stats.lastStudyDate) {
+                const lastStudy = new Date(stats.lastStudyDate);
+                const daysSinceStudy = Math.floor((new Date() - lastStudy) / (1000 * 60 * 60 * 24));
+                
+                if (daysSinceStudy >= 1) {
+                    notifications.push({
+                        type: 'reminders',
+                        icon: 'clock',
+                        title: 'Study Reminder',
+                        message: `Time to continue your studies! Last session was ${daysSinceStudy} day${daysSinceStudy > 1 ? 's' : ''} ago.`,
+                        time: getRelativeTime(stats.lastStudyDate)
+                    });
+                }
+            }
+            
+            // Display notifications or show empty state
+            if (notifications.length === 0) {
+                noNotifications.style.display = 'block';
+                return;
+            }
+            
+            noNotifications.style.display = 'none';
+            notificationsList.innerHTML = '';
+            
+            // Sort notifications by relevance (achievements first, then by recency)
+            notifications.sort((a, b) => {
+                if (a.type === 'achievement' && b.type !== 'achievement') return -1;
+                if (b.type === 'achievement' && a.type !== 'achievement') return 1;
+                return 0;
+            });
+            
+            // Display notifications
+            notifications.slice(0, 10).forEach(notification => {
+                const notificationElement = document.createElement('div');
+                notificationElement.className = 'notification-item';
+                notificationElement.setAttribute('data-type', notification.type);
+                
+                notificationElement.innerHTML = `
+                    <div class="notification-icon ${notification.type}">
+                        <i data-lucide="${notification.icon}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>${notification.title}</h4>
+                        <p>${notification.message}</p>
+                        <span class="notification-time">${notification.time || 'Recently'}</span>
+                    </div>
+                `;
+                
+                notificationsList.appendChild(notificationElement);
+            });
+            
+            // Re-initialize Lucide icons for new notifications
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+        
+        function getRelativeTime(timestamp) {
+            if (!timestamp) return 'Recently';
+            
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diffMs = now - time;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+            return time.toLocaleDateString();
         }
         
         // Load real user statistics

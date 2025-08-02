@@ -2,24 +2,10 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 import json
 import os
 from datetime import datetime
+from database import db
 
 app = Flask(__name__)
 app.secret_key = 'exam_tracker_secret_key_2024'
-
-# Data storage (in production, use a proper database)
-DATA_FILE = 'user_progress.json'
-
-def load_user_progress():
-    """Load user progress from JSON file"""
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_user_progress(data):
-    """Save user progress to JSON file"""
-    with open(DATA_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
 
 def get_exam_syllabi():
     """Return comprehensive syllabi for all exams (copied from PrepDyno with improvements)"""
@@ -403,53 +389,59 @@ def select_exam():
     try:
         data = request.get_json()
         user_id = data.get('user_id')
+        
+        # Handle both single exam and multiple exams
         exam = data.get('exam')
+        selected_exams = data.get('selected_exams', [])
         
-        if not user_id or not exam:
-            return jsonify({'success': False, 'message': 'Missing user_id or exam'})
+        # If selected_exams is provided, use it; otherwise use single exam
+        if selected_exams:
+            exams_to_process = selected_exams
+        elif exam:
+            exams_to_process = [exam]
+        else:
+            return jsonify({'success': False, 'error': 'Missing exam selection'})
         
-        # Load existing user data
-        user_data_file = f'user_data_{user_id}.json'
-        user_data = {}
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Missing user_id'})
         
-        if os.path.exists(user_data_file):
-            with open(user_data_file, 'r') as f:
-                user_data = json.load(f)
+        # Save selected exams to database
+        user_data = {
+            'selected_exams': exams_to_process,
+            'selected_exam': exams_to_process[0],  # Keep backward compatibility
+            'exam_selected_at': datetime.now().isoformat()
+        }
         
-        # Save selected exam
-        user_data['selected_exam'] = exam
-        user_data['exam_selected_at'] = datetime.now().isoformat()
+        db.save_user_data(user_id, user_data)
         
-        # Initialize progress if not exists
-        if 'progress' not in user_data:
-            user_data['progress'] = {}
+        # Initialize progress for all selected exams in database
+        syllabi = get_exam_syllabi()
+        existing_progress = db.get_user_progress(user_id)
         
-        if exam not in user_data['progress']:
-            syllabi = get_exam_syllabi()
-            if exam in syllabi:
-                user_data['progress'][exam] = {}
-                for subject, topics in syllabi[exam].items():
-                    user_data['progress'][exam][subject] = {}
-                    for topic in topics:
-                        user_data['progress'][exam][subject][topic] = {
-                            'theory': False,
-                            'practice': False,
-                            'revision': False,
-                            'completed_at': None
-                        }
+        for exam_name in exams_to_process:
+            if exam_name not in existing_progress:
+                if exam_name in syllabi:
+                    for subject, topics in syllabi[exam_name].items():
+                        for topic in topics:
+                            progress_data = {
+                                'theory': False,
+                                'practice': False,
+                                'revision': False,
+                                'completed_at': None
+                            }
+                            db.save_user_progress(user_id, exam_name, subject, topic, progress_data)
         
-        # Save user data
-        with open(user_data_file, 'w') as f:
-            json.dump(user_data, f, indent=2)
-        
+        exam_names = ', '.join(exams_to_process)
         return jsonify({
             'success': True, 
-            'message': f'Exam {exam} selected successfully!',
-            'redirect_url': f'/tracker/{exam}'
+            'message': f'Exam(s) {exam_names} selected successfully!',
+            'redirect_url': f'/tracker/{exams_to_process[0]}',
+            'selected_exams': exams_to_process
         })
         
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        print(f"Error in select_exam: {str(e)}")  # Debug logging
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/get-user-exam', methods=['POST'])
 def get_user_exam():
@@ -461,20 +453,30 @@ def get_user_exam():
         if not user_id:
             return jsonify({'success': False, 'message': 'Missing user_id'})
         
-        user_data_file = f'user_data_{user_id}.json'
+        # Get user data from database
+        user_data = db.get_user_data(user_id)
         
-        if os.path.exists(user_data_file):
-            with open(user_data_file, 'r') as f:
-                user_data = json.load(f)
-                selected_exam = user_data.get('selected_exam')
-                
-                if selected_exam:
-                    return jsonify({
-                        'success': True,
-                        'has_selected_exam': True,
-                        'selected_exam': selected_exam,
-                        'redirect_url': f'/tracker/{selected_exam}'
-                    })
+        if user_data:
+            # Check for multiple exams first, then fallback to single exam
+            selected_exams = user_data.get('selected_exams', [])
+            selected_exam = user_data.get('selected_exam')
+            
+            if selected_exams:
+                return jsonify({
+                    'success': True,
+                    'has_selected_exam': True,
+                    'selected_exam': selected_exams[0],  # Primary exam for redirect
+                    'selected_exams': selected_exams,    # All selected exams
+                    'redirect_url': f'/tracker/{selected_exams[0]}'
+                })
+            elif selected_exam:
+                return jsonify({
+                    'success': True,
+                    'has_selected_exam': True,
+                    'selected_exam': selected_exam,
+                    'selected_exams': [selected_exam],
+                    'redirect_url': f'/tracker/{selected_exam}'
+                })
         
         return jsonify({
             'success': True,
@@ -482,6 +484,7 @@ def get_user_exam():
         })
         
     except Exception as e:
+        print(f"Error in get_user_exam: {str(e)}")  # Debug logging
         return jsonify({'success': False, 'message': str(e)})
 
 @app.route('/login')
@@ -520,11 +523,18 @@ def get_syllabi():
 @app.route('/api/progress/<exam>')
 def get_progress(exam):
     """Get progress for a specific exam"""
-    user_id = session.get('user_id', 'default_user')
-    progress_data = load_user_progress()
-    user_progress = progress_data.get(user_id, {})
-    exam_progress = user_progress.get(exam, {})
-    return jsonify(exam_progress)
+    try:
+        # Get user_id from request or session
+        user_id = request.args.get('user_id') or session.get('user_id', 'default_user')
+        
+        # Get progress from database
+        all_progress = db.get_user_progress(user_id, exam)
+        exam_progress = all_progress.get(exam, {})
+        
+        return jsonify(exam_progress)
+    except Exception as e:
+        print(f"Error in get_progress: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/progress/<exam>', methods=['POST'])
 def update_progress(exam):
@@ -572,60 +582,42 @@ def save_progress():
                 if chapter not in progress_data[subject]:
                     progress_data[subject][chapter] = {}
                 progress_data[subject][chapter][status_type] = value
+        
         # Validate
         if not exam or not user_id:
             return jsonify({'error': 'Missing exam or userId'}), 400
-        # Load existing user progress
-        progress_file = f"user_progress_{user_id}.json"
-        try:
-            with open(progress_file, 'r') as f:
-                user_progress = json.load(f)
-        except FileNotFoundError:
-            user_progress = {
-                'userId': user_id,
-                'createdAt': datetime.datetime.now().isoformat(),
-                'exams': {},
-                'statistics': {
-                    'totalExams': 0,
-                    'completedTopics': 0,
-                    'studyStreak': 0,
-                    'totalStudyHours': 0,
-                    'lastStudyDate': None
-                },
-                'recentActivity': [],
-                'preferences': {
-                    'notifications': True,
-                    'reminders': True,
-                    'darkMode': True,
-                    'studyGoal': 2
+        
+        # Save progress to database
+        for subject, chapters in progress_data.items():
+            for chapter, statuses in chapters.items():
+                # Convert status values to boolean
+                progress_entry = {
+                    'theory': statuses.get('Theory', 'false').lower() == 'true',
+                    'practice': statuses.get('Practice', 'false').lower() == 'true', 
+                    'revision': statuses.get('Revision', 'false').lower() == 'true',
+                    'completed_at': datetime.datetime.now().isoformat() if any([
+                        statuses.get('Theory', 'false').lower() == 'true',
+                        statuses.get('Practice', 'false').lower() == 'true',
+                        statuses.get('Revision', 'false').lower() == 'true'
+                    ]) else None
                 }
+                
+                db.save_user_progress(user_id, exam, subject, chapter, progress_entry)
+        
+        # Get updated progress for statistics
+        all_progress = db.get_user_progress(user_id)
+        completed_topics = calculate_completed_topics(all_progress)
+        
+        # Create user progress summary for response
+        user_progress = {
+            'statistics': {
+                'totalExams': len(all_progress),
+                'completedTopics': completed_topics,
+                'studyStreak': 0,  # TODO: Implement streak calculation
+                'totalStudyHours': 0,  # TODO: Implement study hours tracking
+                'lastStudyDate': datetime.datetime.now().isoformat()
             }
-        # Update exam progress
-        if exam not in user_progress['exams']:
-            user_progress['exams'][exam] = {
-                'startedAt': datetime.datetime.now().isoformat(),
-                'subjects': {}
-            }
-            user_progress['statistics']['totalExams'] = len(user_progress['exams'])
-        user_progress['exams'][exam]['subjects'] = progress_data
-        user_progress['exams'][exam]['lastUpdated'] = datetime.datetime.now().isoformat()
-        user_progress['lastUpdated'] = datetime.datetime.now().isoformat()
-        # Update statistics
-        completed_topics = calculate_completed_topics(user_progress['exams'])
-        user_progress['statistics']['completedTopics'] = completed_topics
-        user_progress['statistics']['lastStudyDate'] = datetime.datetime.now().isoformat()
-        # Add to recent activity
-        activity = {
-            'timestamp': datetime.datetime.now().isoformat(),
-            'description': f'Updated progress in {exam.upper()}',
-            'exam': exam,
-            'type': 'progress_update'
         }
-        user_progress['recentActivity'].insert(0, activity)
-        user_progress['recentActivity'] = user_progress['recentActivity'][:50]  # Keep last 50 activities
-        # Save updated progress
-        with open(progress_file, 'w') as f:
-            json.dump(user_progress, f, indent=2)
         # Return appropriate response
         if request.is_json:
             return jsonify({
@@ -643,56 +635,18 @@ def save_progress():
 
         return jsonify({'error': str(e)}), 500
 
-def calculate_completed_topics(exams):
-    """Calculate total completed topics across all exams"""
+def calculate_completed_topics(progress_data):
+    """Calculate total completed topics across all exams from database structure"""
     total_completed = 0
-    for exam_data in exams.values():
-        subjects = exam_data.get('subjects', {})
-        for subject_data in subjects.values():
-            chapters = subject_data.get('chapters', {})
-            for chapter_data in chapters.values():
-                topics = chapter_data.get('topics', {})
-                for topic_data in topics.values():
-                    if (topic_data.get('theory') == 'completed' and 
-                        topic_data.get('practice') == 'completed' and 
-                        topic_data.get('revision') == 'completed'):
-                        total_completed += 1
+    for exam_name, exam_data in progress_data.items():
+        for subject_name, subject_data in exam_data.items():
+            for topic_name, topic_data in subject_data.items():
+                # Count as completed if all three statuses are True
+                if (topic_data.get('theory') and 
+                    topic_data.get('practice') and 
+                    topic_data.get('revision')):
+                    total_completed += 1
     return total_completed
-    data = request.get_json()
-    exam = data.get('exam')
-    subject = data.get('subject')
-    topic = data.get('topic')
-    
-    if not all([exam, subject, topic]):
-        return jsonify({'error': 'Missing required fields'}), 400
-    
-    # Load current progress
-    user_progress = load_user_progress()
-    
-    # Initialize structure if needed
-    if exam not in user_progress:
-        user_progress[exam] = {}
-    if subject not in user_progress[exam]:
-        user_progress[exam][subject] = {}
-    if topic not in user_progress[exam][subject]:
-        user_progress[exam][subject][topic] = {
-            'completed': False,
-            'completed_at': None
-        }
-    
-    # Toggle completion status
-    current_status = user_progress[exam][subject][topic]['completed']
-    user_progress[exam][subject][topic]['completed'] = not current_status
-    user_progress[exam][subject][topic]['completed_at'] = datetime.now().isoformat() if not current_status else None
-    
-    # Save progress
-    save_user_progress(user_progress)
-    
-    return jsonify({
-        'success': True,
-        'completed': user_progress[exam][subject][topic]['completed'],
-        'completed_at': user_progress[exam][subject][topic]['completed_at']
-    })
 
 @app.route('/api/stats/<exam>')
 def get_exam_stats(exam):

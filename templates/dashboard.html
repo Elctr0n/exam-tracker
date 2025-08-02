@@ -412,6 +412,9 @@
     </div>
 
     <script>
+        // Global variable to track selected exams
+        let selectedExams = [];
+
         function createParticles() {
             const particlesContainer = document.querySelector('.particles');
             const particleCount = 50;
@@ -448,8 +451,35 @@
                 document.getElementById('userAvatar').textContent = userData.displayName.charAt(0).toUpperCase();
             }
             
-            // Check if user has already selected an exam
+            // Load selected exams from localStorage first
+            loadSelectedExamsFromStorage();
+            
+            // Then check backend for any updates
             checkUserExamSelection(userData.uid);
+        }
+        
+        function loadSelectedExamsFromStorage() {
+            const savedExams = localStorage.getItem('selectedExams');
+            if (savedExams) {
+                try {
+                    const exams = JSON.parse(savedExams);
+                    selectedExams = [...exams];
+                    
+                    // Update UI for each selected exam
+                    exams.forEach(exam => {
+                        const checkbox = document.getElementById(`exam-${exam}`);
+                        const examCard = document.querySelector(`[data-exam="${exam}"]`);
+                        if (checkbox && examCard) {
+                            checkbox.checked = true;
+                            examCard.classList.add('selected');
+                        }
+                    });
+                    
+                    updateSelectionUI();
+                } catch (error) {
+                    console.error('Error loading selected exams from storage:', error);
+                }
+            }
         }
         
         function checkUserExamSelection(userId) {
@@ -484,6 +514,87 @@
             })
             .catch(error => {
                 console.error('Error checking user exam:', error);
+            });
+        }
+
+        function toggleExamSelection(examName) {
+            const checkbox = document.getElementById(`exam-${examName}`);
+            const examCard = document.querySelector(`[data-exam="${examName}"]`);
+            
+            if (checkbox.checked) {
+                // Add exam to selection
+                if (!selectedExams.includes(examName)) {
+                    selectedExams.push(examName);
+                }
+                examCard.classList.add('selected');
+            } else {
+                // Remove exam from selection
+                selectedExams = selectedExams.filter(exam => exam !== examName);
+                examCard.classList.remove('selected');
+            }
+            
+            // Update UI
+            updateSelectionUI();
+            
+            // Save to localStorage
+            localStorage.setItem('selectedExams', JSON.stringify(selectedExams));
+        }
+        
+        function updateSelectionUI() {
+            const selectedCount = document.getElementById('selectedCount');
+            const startButton = document.getElementById('startTrackingBtn');
+            
+            selectedCount.textContent = `${selectedExams.length} exam${selectedExams.length !== 1 ? 's' : ''} selected`;
+            
+            if (selectedExams.length > 0) {
+                startButton.disabled = false;
+                startButton.textContent = `🚀 Start Tracking Selected Exam${selectedExams.length !== 1 ? 's' : ''}`;
+            } else {
+                startButton.disabled = true;
+                startButton.textContent = '🚀 Start Tracking Selected Exams';
+            }
+        }
+        
+        function startMultipleExamTracking() {
+            if (selectedExams.length === 0) {
+                alert('Please select at least one exam to track!');
+                return;
+            }
+            
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            if (!userData.uid) {
+                alert('Please login first!');
+                window.location.href = '/login';
+                return;
+            }
+            
+            // Save selected exams to backend
+            fetch('/select-exam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userData.uid,
+                    selected_exams: selectedExams
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Store current exam for tracker
+                    localStorage.setItem('currentExam', selectedExams[0]);
+                    localStorage.setItem('selectedExams', JSON.stringify(selectedExams));
+                    
+                    // Redirect to tracker for the first selected exam
+                    window.location.href = `/tracker/${selectedExams[0]}`;
+                } else {
+                    alert('Error saving exam selection: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error connecting to server. Please try again.');
             });
         }
 
