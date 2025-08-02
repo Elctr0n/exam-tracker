@@ -1188,11 +1188,13 @@
     <script>
         // Check authentication and load real user data
         function checkAuthAndLoadProfile() {
-            const userLoggedIn = localStorage.getItem('userLoggedIn');
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
             const userData = JSON.parse(localStorage.getItem('userData') || '{}');
             
-            if (!userLoggedIn || !userData.uid) {
-                // Redirect to login if not authenticated
+            if (userSession !== 'true' || !sessionExpiry || currentTime >= parseInt(sessionExpiry) || !userData.uid) {
+                // Redirect to login if not authenticated or session expired
                 window.location.href = '/login?redirect=/profile';
                 return;
             }

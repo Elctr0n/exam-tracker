@@ -75,10 +75,45 @@
             background-clip: text;
         }
 
+        .exam-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         .exam-title {
             font-size: 1.5rem;
             font-weight: 700;
             color: #00ff88;
+        }
+
+        .exam-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .exam-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .exam-selector:focus {
+            outline: none;
+            border-color: #00ff88;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .exam-selector option {
+            background: #1a1a2e;
+            color: white;
         }
 
         .back-button {
@@ -388,10 +423,18 @@
     <div class="header">
         <div class="header-content">
             <div class="logo-small">PrepDyno</div>
-            <div class="exam-title">{{ exam }} Tracker</div>
+            <div class="exam-section">
+                <div class="exam-title" id="currentExamTitle">{{ exam }} Tracker</div>
+                <div class="exam-toggle" id="examToggle" style="display: none;">
+                    <select id="examSelector" class="exam-selector" onchange="switchExam(this.value)">
+                        <option value="{{ exam }}">{{ exam }}</option>
+                    </select>
+                </div>
+            </div>
             <div class="header-nav">
                 <a href="{{ url_for('index') }}" class="nav-btn">🏠 Home</a>
                 <a href="/stats" class="nav-btn" onclick="handleStats()">📊 Stats</a>
+                <a href="/dashboard" class="nav-btn">🎯 Dashboard</a>
                 <a href="{{ url_for('index') }}" class="back-button">← Back to Exams</a>
             </div>
         </div>
@@ -595,12 +638,61 @@
             }
         }
 
+        // Load user's selected exams and setup exam selector
+        function loadUserExams() {
+            const selectedExams = localStorage.getItem('selectedExams');
+            const currentExam = localStorage.getItem('currentExam');
+            
+            if (selectedExams) {
+                try {
+                    const exams = JSON.parse(selectedExams);
+                    if (exams.length > 1) {
+                        // Show exam selector if user has multiple exams
+                        const examToggle = document.getElementById('examToggle');
+                        const examSelector = document.getElementById('examSelector');
+                        
+                        examToggle.style.display = 'flex';
+                        
+                        // Clear existing options
+                        examSelector.innerHTML = '';
+                        
+                        // Add options for each selected exam
+                        exams.forEach(exam => {
+                            const option = document.createElement('option');
+                            option.value = exam;
+                            option.textContent = exam;
+                            if (exam === currentExam || (window.location.pathname.includes(exam))) {
+                                option.selected = true;
+                            }
+                            examSelector.appendChild(option);
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error parsing selected exams:', e);
+                }
+            }
+        }
+
+        // Switch to a different exam
+        function switchExam(selectedExam) {
+            if (selectedExam) {
+                // Update current exam in localStorage
+                localStorage.setItem('currentExam', selectedExam);
+                
+                // Redirect to the selected exam's tracker
+                window.location.href = `/tracker/${selectedExam}`;
+            }
+        }
+
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
             // Check authentication before loading tracker
             if (!checkAuthentication()) {
                 return; // Stop execution if not authenticated
             }
+            
+            // Load user's selected exams and setup exam selector
+            loadUserExams();
             
             // Set user_id from localStorage for form submission
             const userData = localStorage.getItem('userData');

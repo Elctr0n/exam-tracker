@@ -199,9 +199,50 @@
         }
 
         .exam-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
-            border-color: rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .exam-card.selected {
+            border-color: #00ff88;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .exam-checkbox {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+
+        .exam-checkbox input[type="checkbox"] {
+            display: none;
+        }
+
+        .exam-checkbox label {
+            display: block;
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .exam-checkbox input[type="checkbox"]:checked + label {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border-color: #00ff88;
+        }
+
+        .exam-checkbox input[type="checkbox"]:checked + label::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0c0c0c;
+            font-weight: bold;
+            font-size: 14px;
         }
 
         .exam-icon {
@@ -249,6 +290,46 @@
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
+
+        .selection-actions {
+            margin-top: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .selected-count {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .start-tracking-btn {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            color: #0c0c0c;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .start-tracking-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .start-tracking-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -276,45 +357,56 @@
 
         <div class="exam-section">
             <div class="section-header">
-                <h2 class="section-title">🎯 Available Exams</h2>
-                <span class="section-badge">Ready to Track</span>
+                <h2 class="section-title">🎯 Select Exams to Track</h2>
+                <span class="section-badge">Multiple Selection Supported</span>
             </div>
             <div class="exams-grid">
-                <div class="exam-card" onclick="startExamTracking('JEE')">
+                <div class="exam-card" data-exam="JEE">
+                    <div class="exam-checkbox">
+                        <input type="checkbox" id="exam-JEE" value="JEE" onchange="toggleExamSelection('JEE')">
+                        <label for="exam-JEE"></label>
+                    </div>
                     <div class="exam-icon">⚛️</div>
                     <div class="exam-title">JEE</div>
                     <div class="exam-subtitle">Joint Entrance Examination</div>
-                    <div class="exam-actions">
-                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('JEE')">Start Tracking</a>
-                    </div>
                 </div>
 
-                <div class="exam-card" onclick="startExamTracking('NEET')">
+                <div class="exam-card" data-exam="NEET">
+                    <div class="exam-checkbox">
+                        <input type="checkbox" id="exam-NEET" value="NEET" onchange="toggleExamSelection('NEET')">
+                        <label for="exam-NEET"></label>
+                    </div>
                     <div class="exam-icon">🧬</div>
                     <div class="exam-title">NEET-UG</div>
                     <div class="exam-subtitle">National Eligibility cum Entrance Test</div>
-                    <div class="exam-actions">
-                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('NEET')">Start Tracking</a>
-                    </div>
                 </div>
 
-                <div class="exam-card" onclick="startExamTracking('IAT')">
+                <div class="exam-card" data-exam="IAT">
+                    <div class="exam-checkbox">
+                        <input type="checkbox" id="exam-IAT" value="IAT" onchange="toggleExamSelection('IAT')">
+                        <label for="exam-IAT"></label>
+                    </div>
                     <div class="exam-icon">🚀</div>
                     <div class="exam-title">IAT</div>
                     <div class="exam-subtitle">Indian Institute of Space Science and Technology Aptitude Test</div>
-                    <div class="exam-actions">
-                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('IAT')">Start Tracking</a>
-                    </div>
                 </div>
 
-                <div class="exam-card" onclick="startExamTracking('UGEE')">
+                <div class="exam-card" data-exam="UGEE">
+                    <div class="exam-checkbox">
+                        <input type="checkbox" id="exam-UGEE" value="UGEE" onchange="toggleExamSelection('UGEE')">
+                        <label for="exam-UGEE"></label>
+                    </div>
                     <div class="exam-icon">💡</div>
                     <div class="exam-title">UGEE</div>
                     <div class="exam-subtitle">Undergraduate Entrance Examination</div>
-                    <div class="exam-actions">
-                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('UGEE')">Start Tracking</a>
-                    </div>
                 </div>
+            </div>
+            
+            <div class="selection-actions">
+                <div class="selected-count" id="selectedCount">0 exams selected</div>
+                <button class="start-tracking-btn" id="startTrackingBtn" onclick="startMultipleExamTracking()" disabled>
+                    🚀 Start Tracking Selected Exams
+                </button>
             </div>
         </div>
     </div>
@@ -376,56 +468,22 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.has_selected_exam) {
-                    // User has already selected an exam, redirect to tracker
-                    setTimeout(() => {
-                        window.location.href = data.redirect_url;
-                    }, 1000); // Small delay to show dashboard briefly
-                    
-                    // Update dashboard to show "Redirecting to your exam..."
-                    document.querySelector('.dashboard-subtitle').innerHTML = 
-                        `Redirecting to your ${data.selected_exam} preparation... <div style="margin-top: 10px;"><div class="loading-spinner"></div></div>`;
+                    // User has previously selected exams, load them
+                    const savedExams = data.selected_exams || [data.selected_exam];
+                    selectedExams = [...savedExams];
+                    savedExams.forEach(exam => {
+                        const checkbox = document.getElementById(`exam-${exam}`);
+                        const examCard = document.querySelector(`[data-exam="${exam}"]`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            examCard.classList.add('selected');
+                        }
+                    });
+                    updateSelectionUI();
                 }
-                // If no exam selected, user stays on dashboard to select
             })
             .catch(error => {
                 console.error('Error checking user exam:', error);
-            });
-        }
-
-        function startExamTracking(exam) {
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            const userId = userData.uid;
-            
-            if (!userId) {
-                alert('Please login first!');
-                window.location.href = '/login';
-                return;
-            }
-            
-            // Save exam selection for this user
-            fetch('/select-exam', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    user_id: userId, 
-                    exam: exam 
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message and redirect
-                    alert(data.message);
-                    window.location.href = data.redirect_url;
-                } else {
-                    alert('Error selecting exam: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error selecting exam:', error);
-                alert('Error selecting exam. Please try again.');
             });
         }
 
@@ -434,6 +492,8 @@
                 localStorage.removeItem('userSession');
                 localStorage.removeItem('sessionExpiry');
                 localStorage.removeItem('userData');
+                localStorage.removeItem('selectedExams');
+                localStorage.removeItem('currentExam');
                 alert('Logged out successfully!');
                 window.location.href = '/login';
             }
