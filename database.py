@@ -21,21 +21,34 @@ class DatabaseManager:
                 # Parse the DATABASE_URL for PostgreSQL
                 url = urlparse(database_url)
                 self.db_type = 'postgresql'
+                
+                # Handle Railway's PostgreSQL connection
                 self.connection = psycopg2.connect(
                     host=url.hostname,
-                    port=url.port,
+                    port=url.port or 5432,
                     user=url.username,
                     password=url.password,
-                    database=url.path[1:]  # Remove leading slash
+                    database=url.path[1:] if url.path else 'railway',  # Remove leading slash
+                    sslmode='require'  # Railway requires SSL
                 )
                 print("✅ Connected to PostgreSQL database")
+                
             except Exception as e:
                 print(f"❌ PostgreSQL connection failed: {e}")
-                print("🔄 Falling back to SQLite...")
-                self.init_sqlite()
+                # In production (Railway), don't fall back to SQLite - raise the error
+                if os.environ.get('RAILWAY_ENVIRONMENT'):
+                    print("🚨 Running in Railway - SQLite fallback disabled")
+                    raise Exception(f"PostgreSQL connection required in production: {e}")
+                else:
+                    print("🔄 Falling back to SQLite for local development...")
+                    self.init_sqlite()
         else:
-            # Use SQLite for local development
-            self.init_sqlite()
+            # Only use SQLite for local development
+            if os.environ.get('RAILWAY_ENVIRONMENT'):
+                raise Exception("DATABASE_URL not found in Railway environment")
+            else:
+                print("🔧 Using SQLite for local development")
+                self.init_sqlite()
         
         # Create tables
         self.create_tables()
