@@ -1390,6 +1390,7 @@
                 </div>
             </div>
             
+            <a href="/dashboard" class="nav-btn" id="dashboardBtn" style="display: none;">🎯 Dashboard</a>
             <a href="/stats" class="nav-btn" onclick="handleStats()">📊 Stats</a>
             <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Leaderboard')">🏆 Leaderboard</a>
             <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Test')">📝 Test</a>
@@ -2054,48 +2055,48 @@
             const userSession = localStorage.getItem('userSession');
             const sessionExpiry = localStorage.getItem('sessionExpiry');
             const currentTime = new Date().getTime();
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
             
             const loggedOutSection = document.getElementById('loggedOutSection');
             const loggedInSection = document.getElementById('loggedInSection');
+            const dashboardBtn = document.getElementById('dashboardBtn');
             
             if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
                 // User is logged in
-                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                
-                // Hide logged out section, show logged in section
                 loggedOutSection.style.display = 'none';
                 loggedInSection.style.display = 'flex';
+                if (dashboardBtn) dashboardBtn.style.display = 'block';
                 
                 // Update user info
-                const userName = document.getElementById('userName');
-                const userInitials = document.getElementById('userInitials');
-                const userAvatar = document.getElementById('userAvatar');
+                const userNameElement = document.getElementById('userName');
+                const userInitialsElement = document.getElementById('userInitials');
+                const userAvatarElement = document.getElementById('userAvatar');
                 
-                const displayName = userData.displayName || userData.email?.split('@')[0] || 'User';
-                userName.textContent = displayName;
-                
-                // Set user avatar or initials
-                if (userData.photoURL) {
-                    userAvatar.src = userData.photoURL;
-                    userAvatar.style.display = 'block';
-                    userInitials.style.display = 'none';
+                if (userData.displayName) {
+                    userNameElement.textContent = userData.displayName;
+                    
+                    // Show initials or avatar
+                    if (userData.photoURL) {
+                        userAvatarElement.src = userData.photoURL;
+                        userAvatarElement.style.display = 'block';
+                        userInitialsElement.style.display = 'none';
+                    } else {
+                        const initials = userData.displayName.split(' ').map(n => n[0]).join('').toUpperCase();
+                        userInitialsElement.textContent = initials;
+                        userInitialsElement.style.display = 'flex';
+                        userAvatarElement.style.display = 'none';
+                    }
                 } else {
-                    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-                    userInitials.textContent = initials;
-                    userInitials.style.display = 'flex';
-                    userAvatar.style.display = 'none';
+                    userNameElement.textContent = 'User';
+                    userInitialsElement.textContent = 'U';
+                    userInitialsElement.style.display = 'flex';
+                    userAvatarElement.style.display = 'none';
                 }
             } else {
-                // User is not logged in or session expired
+                // User is not logged in
                 loggedOutSection.style.display = 'flex';
                 loggedInSection.style.display = 'none';
-                
-                // Clear expired session
-                if (userSession === 'true' && sessionExpiry && currentTime >= parseInt(sessionExpiry)) {
-                    localStorage.removeItem('userSession');
-                    localStorage.removeItem('sessionExpiry');
-                    localStorage.removeItem('userData');
-                }
+                if (dashboardBtn) dashboardBtn.style.display = 'none';
             }
         }
 
@@ -2234,8 +2235,27 @@
             }
         }
 
+        // Auto-redirect logged-in users to dashboard
+        function checkAndRedirectToDashboard() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is logged in and session is valid, redirect to dashboard
+                window.location.href = '/dashboard';
+                return true;
+            }
+            return false;
+        }
+
         // Exam selection functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in and redirect to dashboard
+            if (checkAndRedirectToDashboard()) {
+                return; // Stop execution if redirecting
+            }
+            
             createParticles();
             updateStudyStats();
             updateNavigationUI(); // Update navigation based on login status

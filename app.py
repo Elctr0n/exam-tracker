@@ -373,7 +373,12 @@ def get_exam_syllabi():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    """Main landing page - Start Your Journey redirects to dashboard"""
+    """Main landing page - Auto-redirect logged-in users to dashboard"""
+    # Check if this is a logged-in user by checking for user data in session
+    # Since we use localStorage on frontend, we'll let the frontend handle the redirect
+    # But we can also check server-side session if available
+    if session.get('user_id'):
+        return redirect(url_for('dashboard'))
     return render_template('index.html')
 
 @app.route("/stats")
@@ -491,7 +496,10 @@ def profile():
     # For now, we'll use a simple check
     return render_template('profile.html')
 
-
+@app.route('/save_confirmation')
+def save_confirmation():
+    """Progress save confirmation page"""
+    return render_template('save_confirmation.html')
 
 @app.route('/tracker/<exam>')
 def tracker(exam):
