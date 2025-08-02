@@ -37,20 +37,25 @@ class DatabaseManager:
         ])
         
         # Try to get database URL from environment (multiple possible names)
-        database_url = (
-            os.environ.get('DATABASE_URL') or 
-            os.environ.get('POSTGRES_URL') or 
-            os.environ.get('POSTGRESQL_URL') or
+        database_urls = [
+            os.environ.get('DATABASE_URL'),
+            os.environ.get('DATABASE_URL_FALLBACK'),
+            os.environ.get('POSTGRES_URL'),
+            os.environ.get('POSTGRESQL_URL'),
             os.environ.get('SUPABASE_URL')
-        )
+        ]
+        database_urls = [url for url in database_urls if url]  # Filter out None values
         
-        if database_url:
-            try:
-                print(f"🔗 Connecting to PostgreSQL database...")
-                self.init_postgresql(database_url)
-                return
-            except Exception as e:
-                print(f"❌ PostgreSQL connection failed: {e}")
+        # Try each database URL in sequence
+        for i, database_url in enumerate(database_urls):
+            if database_url:
+                try:
+                    print(f"🔗 Connecting to PostgreSQL database (URL {i+1}/{len(database_urls)})...")
+                    self.init_postgresql(database_url)
+                    return
+                except Exception as e:
+                    print(f"❌ PostgreSQL connection failed (URL {i+1}): {e}")
+                    continue
         
         # If no database URL or connection failed, try fallback strategies
         if is_production:
@@ -83,39 +88,73 @@ class DatabaseManager:
         self.create_tables()
     
     def init_postgresql(self, database_url):
-        """Initialize PostgreSQL database connection"""
+        """Initialize PostgreSQL database connection with retry mechanism"""
+        import time
+        
         # Parse the DATABASE_URL for PostgreSQL
         url = urlparse(database_url)
         self.db_type = 'postgresql'
         
-        # Connect to PostgreSQL with version-specific handling
-        if PSYCOPG_VERSION == 3:
-            # psycopg3 connection
-            self.connection = psycopg2.connect(
-                host=url.hostname,
-                port=url.port or 5432,
-                user=url.username,
-                password=url.password,
-                dbname=url.path[1:] if url.path else 'postgres',  # Remove leading slash
-                sslmode='require',  # Supabase requires SSL
-                connect_timeout=15,  # 15 second timeout
-                row_factory=dict_row
-            )
-        else:
-            # psycopg2 connection
-            self.connection = psycopg2.connect(
-                host=url.hostname,
-                port=url.port or 5432,
-                user=url.username,
-                password=url.password,
-                database=url.path[1:] if url.path else 'postgres',  # Remove leading slash
-                sslmode='require',  # Supabase requires SSL
-                connect_timeout=15  # 15 second timeout
-            )
-            # Enable dict-like row access for psycopg2
-            self.connection.cursor_factory = psycopg2.extras.RealDictCursor
+        # Connection parameters
+        connection_params = {
+            'host': url.hostname,
+            'port': url.port or 5432,
+            'user': url.username,
+            'password': url.password,
+            'sslmode': 'require',  # Supabase requires SSL
+            'connect_timeout': 10,  # Reduced timeout for faster retries
+        }
         
-        print(f"✅ Connected to PostgreSQL database (psycopg v{PSYCOPG_VERSION})")
+        # Add database name based on psycopg version
+        if PSYCOPG_VERSION == 3:
+            connection_params['dbname'] = url.path[1:] if url.path else 'postgres'
+        else:
+            connection_params['database'] = url.path[1:] if url.path else 'postgres'
+        
+        # Try multiple connection attempts with different strategies
+        connection_attempts = [
+            # Attempt 1: Direct connection
+            connection_params.copy(),
+            # Attempt 2: With shorter timeout
+            {**connection_params, 'connect_timeout': 5},
+            # Attempt 3: Alternative Supabase endpoint (pooler)
+            {**connection_params, 'host': 'aws-0-ap-south-1.pooler.supabase.com', 'port': 6543} if 'supabase.co' in url.hostname else connection_params.copy()
+        ]
+        
+        last_error = None
+        for attempt, params in enumerate(connection_attempts, 1):
+            try:
+                print(f"🔄 Connection attempt {attempt}/3 to {params['host']}:{params['port']}...")
+                
+                if PSYCOPG_VERSION == 3:
+                    # psycopg3 connection
+                    params['row_factory'] = dict_row
+                    self.connection = psycopg2.connect(**params)
+                else:
+                    # psycopg2 connection
+                    self.connection = psycopg2.connect(**params)
+                    # Enable dict-like row access for psycopg2
+                    self.connection.cursor_factory = psycopg2.extras.RealDictCursor
+                
+                # Test the connection
+                cursor = self.connection.cursor()
+                cursor.execute('SELECT 1;')
+                cursor.fetchone()
+                cursor.close()
+                
+                print(f"✅ Connected to PostgreSQL database (psycopg v{PSYCOPG_VERSION}) on attempt {attempt}")
+                return
+                
+            except Exception as e:
+                last_error = e
+                print(f"❌ Attempt {attempt} failed: {e}")
+                if attempt < len(connection_attempts):
+                    print(f"⏳ Waiting 2 seconds before next attempt...")
+                    time.sleep(2)
+                continue
+        
+        # If all attempts failed, raise the last error
+        raise last_error
     
     def init_sqlite(self):
         """Initialize SQLite database"""
