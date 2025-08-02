@@ -442,10 +442,63 @@
                 padding: 1.5rem;
             }
         }
+        
+        .developer-notice {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(45deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .notice-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .notice-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .notice-close:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 7rem 1rem 2rem;
+            }    
+        }
     </style>
 </head>
 <body>
     <div class="particles"></div>
+    
+    <!-- Developer Notice -->
+    <div class="developer-notice">
+        <div class="notice-content">
+            <i data-feather="info" style="width: 16px; height: 16px;"></i>
+            <span>👨‍💻 Solo developer project built with Claude Sonnet 3.5. Some features may have bugs - thanks for your patience!</span>
+            <button class="notice-close" onclick="this.parentElement.parentElement.style.display='none'">
+                <i data-feather="x" style="width: 14px; height: 14px;"></i>
+            </button>
+        </div>
+    </div>
     
     <!-- Navigation Header -->
     <nav class="nav-header">

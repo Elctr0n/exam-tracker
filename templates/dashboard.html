@@ -414,10 +414,47 @@
             cursor: not-allowed;
             box-shadow: none;
         }
+        
+        .developer-notice {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #f7f7f7;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+            z-index: 1000;
+        }
+        
+        .notice-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .notice-close {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="particles"></div>
+    
+    <!-- Developer Notice -->
+    <div class="developer-notice">
+        <div class="notice-content">
+            <i data-feather="info" style="width: 16px; height: 16px;"></i>
+            <span>👨‍💻 Solo developer project built with Claude Sonnet 3.5. Some features may have bugs - thanks for your patience!</span>
+            <button class="notice-close" onclick="this.parentElement.parentElement.style.display='none'">
+                <i data-feather="x" style="width: 14px; height: 14px;"></i>
+            </button>
+        </div>
+    </div>
     
     <nav class="nav-header">
         <a href="/" class="nav-logo">ExamX</a>
