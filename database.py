@@ -12,8 +12,22 @@ class DatabaseManager:
     
     def init_database(self):
         """Initialize database connection - PostgreSQL for production, SQLite for development"""
+        # Debug: Print all environment variables
+        print(f"🔍 All env vars: {list(os.environ.keys())}")
+        
         # Check for PostgreSQL connection (Railway provides DATABASE_URL)
-        database_url = os.environ.get('DATABASE_URL')
+        database_url = (
+            os.environ.get('DATABASE_URL') or 
+            os.environ.get('POSTGRES_URL') or
+            os.environ.get('DATABASE_PRIVATE_URL') or
+            os.environ.get('POSTGRES_PRIVATE_URL')
+        )
+        print(f"🔍 Found database_url: {database_url[:50] if database_url else 'None'}...")
+        
+        # Fallback: Use hardcoded Railway internal URL if no env var found
+        if not database_url:
+            database_url = "postgresql://postgres:pHeoIiCbCtdGVKEuSSyOFnLHQRGXAFdB@postgres.railway.internal:5432/railway"
+            print("🔧 Using hardcoded Railway internal DATABASE_URL as fallback")
         
         if database_url:
             try:
