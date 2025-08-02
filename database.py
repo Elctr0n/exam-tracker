@@ -52,20 +52,29 @@ class DatabaseManager:
             except Exception as e:
                 print(f"❌ PostgreSQL connection failed: {e}")
         
-        # If no database URL or connection failed, try Supabase fallback in production
+        # If no database URL or connection failed, try fallback strategies
         if is_production:
             print("🚨 Production environment - trying Supabase fallback...")
             print(f"Available env vars: {[k for k in os.environ.keys() if any(term in k.upper() for term in ['DATABASE', 'POSTGRES', 'SUPABASE', 'RAILWAY'])]}")
             
             # Try with Supabase connection string as fallback
-            supabase_url = "postgresql://postgres:8a4osq4qVwS5ZQAA@db.tkdcbjtrgeufbbhfmklo.supabase.co:5432/postgres"
+            supabase_url = "postgresql://postgres:8a4osq4qVwS5ZQAA@db.tkdcbjtrgeufbbhfmklo.supabase.co:5432/postgres?sslmode=require&connect_timeout=15"
             try:
                 self.init_postgresql(supabase_url)
                 print("✅ Supabase fallback connection successful!")
                 return
             except Exception as fallback_error:
                 print(f"❌ Supabase fallback failed: {fallback_error}")
-                raise Exception("No database connection available in production environment")
+                print("🔄 Attempting SQLite fallback for production (temporary solution)...")
+                
+                # Try SQLite as last resort in production
+                try:
+                    self.init_sqlite()
+                    print("⚠️ Using SQLite in production - data will not persist between deployments!")
+                    return
+                except Exception as sqlite_error:
+                    print(f"❌ SQLite fallback also failed: {sqlite_error}")
+                    raise Exception("No database connection available - all fallbacks failed")
         else:
             print("🔧 Using SQLite for local development")
             self.init_sqlite()
@@ -89,6 +98,7 @@ class DatabaseManager:
                 password=url.password,
                 dbname=url.path[1:] if url.path else 'postgres',  # Remove leading slash
                 sslmode='require',  # Supabase requires SSL
+                connect_timeout=15,  # 15 second timeout
                 row_factory=dict_row
             )
         else:
@@ -99,7 +109,8 @@ class DatabaseManager:
                 user=url.username,
                 password=url.password,
                 database=url.path[1:] if url.path else 'postgres',  # Remove leading slash
-                sslmode='require'  # Supabase requires SSL
+                sslmode='require',  # Supabase requires SSL
+                connect_timeout=15  # 15 second timeout
             )
             # Enable dict-like row access for psycopg2
             self.connection.cursor_factory = psycopg2.extras.RealDictCursor

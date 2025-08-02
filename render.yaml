@@ -7,7 +7,7 @@ services:
     startCommand: gunicorn --bind 0.0.0.0:$PORT app:app --timeout 120 --workers 2
     envVars:
       - key: DATABASE_URL
-        value: postgresql://postgres:8a4osq4qVwS5ZQAA@db.tkdcbjtrgeufbbhfmklo.supabase.co:5432/postgres
+        value: postgresql://postgres:8a4osq4qVwS5ZQAA@db.tkdcbjtrgeufbbhfmklo.supabase.co:5432/postgres?sslmode=require&connect_timeout=10
       - key: FLASK_ENV
         value: production
       - key: RENDER_ENVIRONMENT
