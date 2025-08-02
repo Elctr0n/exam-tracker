@@ -535,19 +535,38 @@ def update_progress(exam):
 
 @app.route('/api/save_progress', methods=['POST'])
 def save_progress():
-    """Save user progress for exam tracking with Firebase user data"""
+    """Save user progress for exam tracking with Firebase user data
+    Handles both JSON (AJAX) and form POSTs (tracker.html form)."""
+    import datetime
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-            
-        exam = data.get('exam')
-        user_id = data.get('userId')
-        progress_data = data.get('progress', {})
-        
+        # Check content type
+        if request.is_json:
+            data = request.get_json()
+            exam = data.get('exam')
+            user_id = data.get('userId')
+            progress_data = data.get('progress', {})
+        else:
+            # Handle form POST (application/x-www-form-urlencoded)
+            exam = request.form.get('exam')
+            user_id = session.get('user_id') or request.form.get('user_id')
+            # Build progress_data from form fields
+            progress_data = {}
+            # Expecting fields like 'Physics__Units and Dimensions__Theory' etc.
+            for key, value in request.form.items():
+                if key in ['exam', 'user_id']:
+                    continue
+                try:
+                    subject, chapter, status_type = key.split('__')
+                except ValueError:
+                    continue
+                if subject not in progress_data:
+                    progress_data[subject] = {}
+                if chapter not in progress_data[subject]:
+                    progress_data[subject][chapter] = {}
+                progress_data[subject][chapter][status_type] = value
+        # Validate
         if not exam or not user_id:
             return jsonify({'error': 'Missing exam or userId'}), 400
-        
         # Load existing user progress
         progress_file = f"user_progress_{user_id}.json"
         try:
@@ -573,7 +592,6 @@ def save_progress():
                     'studyGoal': 2
                 }
             }
-        
         # Update exam progress
         if exam not in user_progress['exams']:
             user_progress['exams'][exam] = {
@@ -581,16 +599,13 @@ def save_progress():
                 'subjects': {}
             }
             user_progress['statistics']['totalExams'] = len(user_progress['exams'])
-        
         user_progress['exams'][exam]['subjects'] = progress_data
         user_progress['exams'][exam]['lastUpdated'] = datetime.datetime.now().isoformat()
         user_progress['lastUpdated'] = datetime.datetime.now().isoformat()
-        
         # Update statistics
         completed_topics = calculate_completed_topics(user_progress['exams'])
         user_progress['statistics']['completedTopics'] = completed_topics
         user_progress['statistics']['lastStudyDate'] = datetime.datetime.now().isoformat()
-        
         # Add to recent activity
         activity = {
             'timestamp': datetime.datetime.now().isoformat(),
@@ -600,18 +615,24 @@ def save_progress():
         }
         user_progress['recentActivity'].insert(0, activity)
         user_progress['recentActivity'] = user_progress['recentActivity'][:50]  # Keep last 50 activities
-        
         # Save updated progress
         with open(progress_file, 'w') as f:
             json.dump(user_progress, f, indent=2)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Progress saved successfully',
-            'statistics': user_progress['statistics']
-        })
-        
+        # Return appropriate response
+        if request.is_json:
+            return jsonify({
+                'success': True,
+                'message': 'Progress saved successfully',
+                'statistics': user_progress['statistics']
+            })
+        else:
+            # Form POST: redirect to confirmation page or back to tracker
+            return redirect(url_for('save_confirmation'))
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
         return jsonify({'error': str(e)}), 500
 
 def calculate_completed_topics(exams):
