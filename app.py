@@ -871,7 +871,7 @@ def sync_user_data():
                             'theory': statuses.get('Theory', False),
                             'practice': statuses.get('Practice', False),
                             'revision': statuses.get('Revision', False),
-                            'completed_at': datetime.datetime.now().isoformat() if any([
+                            'completed_at': datetime.now().isoformat() if any([
                                 statuses.get('Theory', False),
                                 statuses.get('Practice', False),
                                 statuses.get('Revision', False)
@@ -883,7 +883,7 @@ def sync_user_data():
         db.log_user_activity(
             user_id=user_id,
             activity_type='data_sync',
-            activity_data={'sync_timestamp': datetime.datetime.now().isoformat()}
+            activity_data={'sync_timestamp': datetime.now().isoformat()}
         )
         
         # Return updated statistics

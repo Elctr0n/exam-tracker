@@ -445,44 +445,48 @@
         
         .developer-notice {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(45deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
-            padding: 0.8rem;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
             z-index: 1000;
+            max-width: 350px;
+            font-size: 0.8rem;
             backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         
         .notice-content {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
-            max-width: 1200px;
-            margin: 0 auto;
+            gap: 0.5rem;
+            line-height: 1.4;
         }
         
         .notice-close {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.7);
             padding: 0;
             cursor: pointer;
+            margin-left: 0.5rem;
             transition: color 0.2s;
         }
         
         .notice-close:hover {
-            color: rgba(255, 255, 255, 1);
+            color: white;
         }
-
+        
         @media (max-width: 768px) {
-            .main-content {
-                padding: 7rem 1rem 2rem;
-            }    
+            .developer-notice {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
         }
     </style>
 </head>
@@ -490,12 +494,12 @@
     <div class="particles"></div>
     
     <!-- Developer Notice -->
-    <div class="developer-notice">
+    <div class="developer-notice" id="devNotice">
         <div class="notice-content">
-            <i data-feather="info" style="width: 16px; height: 16px;"></i>
-            <span>👨‍💻 Solo developer project built with Claude Sonnet 3.5. Some features may have bugs - thanks for your patience!</span>
-            <button class="notice-close" onclick="this.parentElement.parentElement.style.display='none'">
-                <i data-feather="x" style="width: 14px; height: 14px;"></i>
+            <i data-feather="code" style="width: 14px; height: 14px;"></i>
+            <span>Solo dev + Claude Sonnet 3.5. Some bugs may exist!</span>
+            <button class="notice-close" onclick="document.getElementById('devNotice').style.display='none'">
+                <i data-feather="x" style="width: 12px; height: 12px;"></i>
             </button>
         </div>
     </div>

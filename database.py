@@ -12,65 +12,76 @@ class DatabaseManager:
     
     def init_database(self):
         """Initialize database connection - PostgreSQL for production, SQLite for development"""
-        # Check for PostgreSQL connection (Supabase provides DATABASE_URL)
+        # Check if we're in production environment
+        is_production = any([
+            os.environ.get('RAILWAY_ENVIRONMENT'),
+            os.environ.get('VERCEL'),
+            os.environ.get('NETLIFY'),
+            os.environ.get('HEROKU'),
+            os.environ.get('PORT'),  # Most platforms set PORT
+            os.environ.get('RAILWAY_PROJECT_ID'),
+            os.environ.get('RAILWAY_SERVICE_ID')
+        ])
+        
+        # Try to get database URL from environment (multiple possible names)
         database_url = (
             os.environ.get('DATABASE_URL') or 
-            os.environ.get('SUPABASE_DB_URL') or
-            os.environ.get('POSTGRES_URL')
+            os.environ.get('POSTGRES_URL') or 
+            os.environ.get('POSTGRESQL_URL') or
+            os.environ.get('SUPABASE_URL')
         )
         
         if database_url:
             try:
-                # Parse the DATABASE_URL for PostgreSQL
-                url = urlparse(database_url)
-                self.db_type = 'postgresql'
-                
-                # Connect to Supabase PostgreSQL
-                self.connection = psycopg2.connect(
-                    host=url.hostname,
-                    port=url.port or 5432,
-                    user=url.username,
-                    password=url.password,
-                    database=url.path[1:] if url.path else 'postgres',  # Remove leading slash
-                    sslmode='require'  # Supabase requires SSL
-                )
-                print("✅ Connected to Supabase PostgreSQL database")
-                
+                print(f"🔗 Connecting to PostgreSQL database...")
+                self.init_postgresql(database_url)
+                return
             except Exception as e:
                 print(f"❌ PostgreSQL connection failed: {e}")
-                # Check if we're in production environment
-                is_production = any([
-                    os.environ.get('RAILWAY_ENVIRONMENT'),
-                    os.environ.get('VERCEL'),
-                    os.environ.get('NETLIFY'),
-                    os.environ.get('HEROKU'),
-                    os.environ.get('PORT')  # Most platforms set PORT
-                ])
-                if is_production:
-                    print("🚨 Running in production - PostgreSQL connection required")
-                    raise Exception(f"PostgreSQL connection required in production: {e}")
-                else:
-                    print("🔄 Falling back to SQLite for local development...")
-                    self.init_sqlite()
+        
+        # If no database URL or connection failed, try Supabase fallback in production
+        if is_production:
+            print("🚨 Production environment - trying Supabase fallback...")
+            print(f"Available env vars: {[k for k in os.environ.keys() if any(term in k.upper() for term in ['DATABASE', 'POSTGRES', 'SUPABASE', 'RAILWAY'])]}")
+            
+            # Try with Supabase connection string as fallback
+            supabase_url = "postgresql://postgres:8a4osq4qVwS5ZQAA@db.tkdcbjtrgeufbbhfmklo.supabase.co:5432/postgres"
+            try:
+                self.init_postgresql(supabase_url)
+                print("✅ Supabase fallback connection successful!")
+                return
+            except Exception as fallback_error:
+                print(f"❌ Supabase fallback failed: {fallback_error}")
+                raise Exception("No database connection available in production environment")
         else:
-            # Check if we're in production environment
-            is_production = any([
-                os.environ.get('RAILWAY_ENVIRONMENT'),
-                os.environ.get('VERCEL'),
-                os.environ.get('NETLIFY'),
-                os.environ.get('HEROKU'),
-                os.environ.get('PORT')  # Most platforms set PORT
-            ])
-            if is_production:
-                print(f"🚨 Production environment detected but DATABASE_URL not found!")
-                print(f"Available env vars: {[k for k in os.environ.keys() if 'DATABASE' in k or 'POSTGRES' in k or 'SUPABASE' in k]}")
-                raise Exception("DATABASE_URL not found in production environment")
-            else:
-                print("🔧 Using SQLite for local development")
-                self.init_sqlite()
+            print("🔧 Using SQLite for local development")
+            self.init_sqlite()
         
         # Create tables
         self.create_tables()
+    
+    def init_postgresql(self, database_url):
+        """Initialize PostgreSQL database connection"""
+        try:
+            import psycopg2
+            from urllib.parse import urlparse
+        except ImportError:
+            raise Exception("psycopg2 not available for PostgreSQL connection")
+        
+        # Parse the DATABASE_URL for PostgreSQL
+        url = urlparse(database_url)
+        self.db_type = 'postgresql'
+        
+        # Connect to PostgreSQL (Supabase)
+        self.connection = psycopg2.connect(
+            host=url.hostname,
+            port=url.port or 5432,
+            user=url.username,
+            password=url.password,
+            database=url.path[1:] if url.path else 'postgres',  # Remove leading slash
+            sslmode='require'  # Supabase requires SSL
+        )
+        print("✅ Connected to PostgreSQL database")
     
     def init_sqlite(self):
         """Initialize SQLite database"""
@@ -305,7 +316,7 @@ class DatabaseManager:
         if self.db_type == 'sqlite':
             conn.close()
         print("✅ Database tables created successfully")
-    print("📊 Enhanced schema: users, user_progress, user_settings, user_activity, study_sessions, user_statistics")
+        print("📊 Enhanced schema: users, user_progress, user_settings, user_activity, study_sessions, user_statistics")
 
     # User Settings Methods
     def save_user_settings(self, user_id, settings):
@@ -314,7 +325,9 @@ class DatabaseManager:
         cursor = conn.cursor()
         
         try:
+            # Start a new transaction
             if self.db_type == 'postgresql':
+                conn.rollback()  # Clear any previous aborted transaction
                 cursor.execute('''
                     INSERT INTO user_settings (user_id, study_reminders, dark_mode, privacy_mode, 
                                               notification_preferences, theme_preferences, study_schedule, updated_at)
@@ -354,9 +367,44 @@ class DatabaseManager:
             conn.commit()
             return True
         except Exception as e:
+            conn.rollback()
             print(f"Error saving user settings: {e}")
+            # Try to recover from transaction error
+            if self.db_type == 'postgresql' and 'current transaction is aborted' in str(e).lower():
+                try:
+                    conn.rollback()  # Clear the aborted transaction
+                    print("Recovered from aborted transaction, retrying...")
+                    # Retry the operation
+                    cursor.execute('''
+                        INSERT INTO user_settings (user_id, study_reminders, dark_mode, privacy_mode, 
+                                                  notification_preferences, theme_preferences, study_schedule, updated_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                        ON CONFLICT (user_id) DO UPDATE SET
+                            study_reminders = EXCLUDED.study_reminders,
+                            dark_mode = EXCLUDED.dark_mode,
+                            privacy_mode = EXCLUDED.privacy_mode,
+                            notification_preferences = EXCLUDED.notification_preferences,
+                            theme_preferences = EXCLUDED.theme_preferences,
+                            study_schedule = EXCLUDED.study_schedule,
+                            updated_at = CURRENT_TIMESTAMP
+                    ''', (
+                        user_id,
+                        settings.get('study_reminders', True),
+                        settings.get('dark_mode', False),
+                        settings.get('privacy_mode', False),
+                        json.dumps(settings.get('notification_preferences', {})),
+                        json.dumps(settings.get('theme_preferences', {})),
+                        json.dumps(settings.get('study_schedule', {}))
+                    ))
+                    conn.commit()
+                    return True
+                except Exception as retry_error:
+                    conn.rollback()
+                    print(f"Retry also failed: {retry_error}")
+                    return False
             return False
         finally:
+            cursor.close()
             if self.db_type == 'sqlite':
                 conn.close()
     
@@ -366,6 +414,9 @@ class DatabaseManager:
         cursor = conn.cursor()
         
         try:
+            # Clear any aborted transaction
+            if self.db_type == 'postgresql':
+                conn.rollback()
             cursor.execute('SELECT * FROM user_settings WHERE user_id = %s' if self.db_type == 'postgresql' else 'SELECT * FROM user_settings WHERE user_id = ?', (user_id,))
             result = cursor.fetchone()
             
@@ -396,45 +447,65 @@ class DatabaseManager:
             if self.db_type == 'sqlite':
                 conn.close()
     
-    def log_user_activity(self, user_id, activity_type, activity_data=None, exam=None, subject=None, topic=None, session_duration=0):
-        """Log user activity for analytics"""
+    def log_user_activity(self, user_id, activity_type, activity_data=None, exam=None, subject=None, topic=None, session_duration=None):
+        """Log user activity for analytics and progress tracking"""
         conn = self.get_connection()
         cursor = conn.cursor()
         
         try:
+            # Clear any aborted transaction
             if self.db_type == 'postgresql':
-                cursor.execute('''
-                    INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                ''', (
-                    user_id,
-                    activity_type,
-                    json.dumps(activity_data or {}),
-                    exam,
-                    subject,
-                    topic,
-                    session_duration
-                ))
-            else:
-                cursor.execute('''
-                    INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    user_id,
-                    activity_type,
-                    json.dumps(activity_data or {}),
-                    exam,
-                    subject,
-                    topic,
-                    session_duration
-                ))
+                conn.rollback()
+            cursor.execute('''
+                INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ''' if self.db_type == 'postgresql' else '''
+                INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user_id,
+                activity_type,
+                json.dumps(activity_data or {}),
+                exam,
+                subject,
+                topic,
+                session_duration
+            ))
             
             conn.commit()
             return True
         except Exception as e:
+            conn.rollback()
             print(f"Error logging user activity: {e}")
+            # Try to recover from transaction error
+            if self.db_type == 'postgresql' and 'current transaction is aborted' in str(e).lower():
+                try:
+                    conn.rollback()  # Clear the aborted transaction
+                    print("Recovered from aborted transaction, retrying activity log...")
+                    cursor.execute('''
+                        INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ''' if self.db_type == 'postgresql' else '''
+                        INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        user_id,
+                        activity_type,
+                        json.dumps(activity_data or {}),
+                        exam,
+                        subject,
+                        topic,
+                        session_duration
+                    ))
+                    conn.commit()
+                    return True
+                except Exception as retry_error:
+                    conn.rollback()
+                    print(f"Activity log retry also failed: {retry_error}")
+                    return False
             return False
         finally:
+            cursor.close()
             if self.db_type == 'sqlite':
                 conn.close()
     
@@ -570,6 +641,9 @@ class DatabaseManager:
         cursor = conn.cursor()
         
         try:
+            # Clear any aborted transaction
+            if self.db_type == 'postgresql':
+                conn.rollback()
             # Get basic statistics
             cursor.execute('SELECT * FROM user_statistics WHERE user_id = %s' if self.db_type == 'postgresql' else 'SELECT * FROM user_statistics WHERE user_id = ?', (user_id,))
             stats_result = cursor.fetchone()
@@ -593,15 +667,18 @@ class DatabaseManager:
             progress_result = cursor.fetchone()
             
             # Get recent activity
-            cursor.execute('''
-                SELECT COUNT(*) as recent_sessions
-                FROM study_sessions 
-                WHERE user_id = %s AND session_start >= %s
-            ''' if self.db_type == 'postgresql' else '''
-                SELECT COUNT(*) as recent_sessions
-                FROM study_sessions 
-                WHERE user_id = ? AND session_start >= date('now', '-7 days')
-            ''', (user_id, 'CURRENT_DATE - INTERVAL \'7 days\'') if self.db_type == 'postgresql' else (user_id,))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT COUNT(*) as recent_sessions
+                    FROM study_sessions 
+                    WHERE user_id = %s AND session_start >= CURRENT_DATE - INTERVAL '7 days'
+                ''', (user_id,))
+            else:
+                cursor.execute('''
+                    SELECT COUNT(*) as recent_sessions
+                    FROM study_sessions 
+                    WHERE user_id = ? AND session_start >= date('now', '-7 days')
+                ''', (user_id,))
             activity_result = cursor.fetchone()
             
             # Combine all statistics
