@@ -1,4 +1,3 @@
-import sqlite3
 import psycopg2
 import json
 import os
@@ -55,6 +54,11 @@ class DatabaseManager:
     
     def init_sqlite(self):
         """Initialize SQLite database"""
+        try:
+            import sqlite3
+        except ImportError:
+            raise Exception("SQLite not available in this environment")
+            
         self.db_type = 'sqlite'
         self.db_path = 'prepdyno.db'
         # Test connection
@@ -69,6 +73,7 @@ class DatabaseManager:
             return self.connection
         else:
             # Create new connection for SQLite to avoid transaction issues
+            import sqlite3
             conn = sqlite3.connect(self.db_path, check_same_thread=False)
             conn.row_factory = sqlite3.Row
             return conn
