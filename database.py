@@ -1,4 +1,16 @@
-import psycopg2
+# Support both psycopg2 and psycopg3 for better compatibility
+try:
+    import psycopg as psycopg2
+    from psycopg.rows import dict_row
+    PSYCOPG_VERSION = 3
+except ImportError:
+    try:
+        import psycopg2
+        import psycopg2.extras
+        PSYCOPG_VERSION = 2
+    except ImportError:
+        raise ImportError("Neither psycopg nor psycopg2 is available")
+
 import json
 import os
 from datetime import datetime
@@ -63,26 +75,36 @@ class DatabaseManager:
     
     def init_postgresql(self, database_url):
         """Initialize PostgreSQL database connection"""
-        try:
-            import psycopg2
-            from urllib.parse import urlparse
-        except ImportError:
-            raise Exception("psycopg2 not available for PostgreSQL connection")
-        
         # Parse the DATABASE_URL for PostgreSQL
         url = urlparse(database_url)
         self.db_type = 'postgresql'
         
-        # Connect to PostgreSQL (Supabase)
-        self.connection = psycopg2.connect(
-            host=url.hostname,
-            port=url.port or 5432,
-            user=url.username,
-            password=url.password,
-            database=url.path[1:] if url.path else 'postgres',  # Remove leading slash
-            sslmode='require'  # Supabase requires SSL
-        )
-        print("✅ Connected to PostgreSQL database")
+        # Connect to PostgreSQL with version-specific handling
+        if PSYCOPG_VERSION == 3:
+            # psycopg3 connection
+            self.connection = psycopg2.connect(
+                host=url.hostname,
+                port=url.port or 5432,
+                user=url.username,
+                password=url.password,
+                dbname=url.path[1:] if url.path else 'postgres',  # Remove leading slash
+                sslmode='require',  # Supabase requires SSL
+                row_factory=dict_row
+            )
+        else:
+            # psycopg2 connection
+            self.connection = psycopg2.connect(
+                host=url.hostname,
+                port=url.port or 5432,
+                user=url.username,
+                password=url.password,
+                database=url.path[1:] if url.path else 'postgres',  # Remove leading slash
+                sslmode='require'  # Supabase requires SSL
+            )
+            # Enable dict-like row access for psycopg2
+            self.connection.cursor_factory = psycopg2.extras.RealDictCursor
+        
+        print(f"✅ Connected to PostgreSQL database (psycopg v{PSYCOPG_VERSION})")
     
     def init_sqlite(self):
         """Initialize SQLite database"""
