@@ -3,8 +3,12 @@
 
 echo "🚀 Starting ExamX build process..."
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Upgrade pip first
+pip install --upgrade pip
+
+# Install Python dependencies with verbose output
+echo "📦 Installing dependencies..."
+pip install -r requirements.txt --no-cache-dir
 
 echo "✅ Dependencies installed successfully"
 echo "🔗 Database connection will be established at runtime"

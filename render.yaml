@@ -2,8 +2,9 @@ services:
   - type: web
     name: examx-app
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    runtime: python-3.11.9
+    buildCommand: ./build.sh
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app --timeout 120 --workers 2
     envVars:
       - key: DATABASE_URL
         value: postgresql://postgres:8a4osq4qVwS5ZQAA@db.tkdcbjtrgeufbbhfmklo.supabase.co:5432/postgres
@@ -11,3 +12,5 @@ services:
         value: production
       - key: RENDER_ENVIRONMENT
         value: production
+      - key: PYTHONPATH
+        value: .
