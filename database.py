@@ -14,13 +14,14 @@ class DatabaseManager:
         """Initialize database connection - PostgreSQL for production, SQLite for development"""
         # Check if we're in production environment
         is_production = any([
+            os.environ.get('RENDER_ENVIRONMENT'),
+            os.environ.get('RENDER_SERVICE_ID'),
             os.environ.get('RAILWAY_ENVIRONMENT'),
             os.environ.get('VERCEL'),
             os.environ.get('NETLIFY'),
             os.environ.get('HEROKU'),
             os.environ.get('PORT'),  # Most platforms set PORT
-            os.environ.get('RAILWAY_PROJECT_ID'),
-            os.environ.get('RAILWAY_SERVICE_ID')
+            os.environ.get('FLASK_ENV') == 'production'
         ])
         
         # Try to get database URL from environment (multiple possible names)
