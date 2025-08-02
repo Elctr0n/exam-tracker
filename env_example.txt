@@ -1,0 +1,6 @@
+# Supabase Database Configuration
+DATABASE_URL=postgresql://postgres:8a4osq4qVwS5ZQAA@db.tkdcbjtrgeufbbhfmklo.supabase.co:5432/postgres
+
+# Supabase API Configuration (for future use)
+SUPABASE_URL=https://tkdcbjtrgeufbbhfmklo.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrZGNianRyZ2V1ZmJiaGZta2xvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxMTQzNzYsImV4cCI6MjA2OTY5MDM3Nn0.jmy7LsFObQai_z5siDQYChFm6iUjNmnmzNL_-wd1wcA

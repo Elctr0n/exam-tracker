@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progress Saved - PrepDyno</title>
+    <title>Progress Saved - ExamX</title>
     <style>
         * {
             margin: 0;
@@ -92,7 +92,12 @@
 </head>
 <body>
     <div class="container">
-        <div class="success-icon">🎉</div>
+        <div class="success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle" style="color: #00ff88;">
+                <path d="m9 12 2 2 4-4"></path>
+                <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+        </div>
         <h1 class="title">Progress Saved!</h1>
         <p class="message">
             Your {{ exam }} exam progress has been successfully saved. 
@@ -103,5 +108,11 @@
             <a href="{{ url_for('index') }}" class="btn">Choose Another Exam</a>
         </div>
     </div>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        // Initialize Feather icons
+        feather.replace();
+    </script>
 </body>
 </html>

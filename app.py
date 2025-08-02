@@ -492,17 +492,54 @@ def login():
     """Firebase login page"""
     return render_template('login.html')
 
+@app.route('/about')
+def about():
+    """About page - app information, features, and contribution details"""
+    app_info = {
+        'name': 'ExamX - Smart Exam Tracker',
+        'version': '2.0.0',
+        'description': 'AI-powered exam preparation tracker with comprehensive progress monitoring',
+        'github_url': 'https://github.com/Elctr0n/exam-tracker',
+        'features': [
+            'Multi-exam support (JEE, NEET, IAT, KEAM)',
+            'Comprehensive syllabus tracking',
+            'Theory, Practice, and Revision progress tracking',
+            'Real-time progress statistics',
+            'Study timer with session tracking',
+            'Firebase authentication',
+            'Responsive modern UI',
+            'Cloud database with Supabase',
+            'Progress visualization and analytics'
+        ],
+        'tech_stack': {
+            'Backend': 'Flask (Python)',
+            'Database': 'PostgreSQL (Supabase)',
+            'Frontend': 'HTML5, CSS3, JavaScript',
+            'Authentication': 'Firebase Auth',
+            'Deployment': 'Railway'
+        },
+        'exam_coverage': {
+            'JEE': {'subjects': 3, 'topics': 67, 'status': 'Active'},
+            'NEET': {'subjects': 3, 'topics': 58, 'status': 'Active'},
+            'IAT': {'subjects': 3, 'topics': 45, 'status': 'Active'},
+            'KEAM': {'subjects': 3, 'topics': 52, 'status': 'Active'}
+        }
+    }
+    return render_template('about.html', app_info=app_info)
+
 @app.route('/profile')
 def profile():
-    """User profile page - requires login"""
-    # In a real implementation, you would check Firebase auth token here
-    # For now, we'll use a simple check
+    """User profile page - authentication handled by Firebase on client-side"""
     return render_template('profile.html')
 
 @app.route('/save_confirmation')
-def save_confirmation():
+@app.route('/save_confirmation/<exam>')
+def save_confirmation(exam=None):
     """Progress save confirmation page"""
-    return render_template('save_confirmation.html')
+    # If no exam specified, try to get from session or redirect to dashboard
+    if not exam:
+        exam = session.get('current_exam', 'JEE')
+    return render_template('save_confirmation.html', exam=exam)
 
 @app.route('/tracker/<exam>')
 def tracker(exam):
@@ -627,7 +664,7 @@ def save_progress():
             })
         else:
             # Form POST: redirect to confirmation page or back to tracker
-            return redirect(url_for('save_confirmation'))
+            return redirect(url_for('save_confirmation', exam=exam))
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -676,6 +713,193 @@ def get_exam_stats(exam):
         'completed_topics': completed_topics,
         'completion_percentage': round(completion_percentage, 1)
     })
+
+# User Settings API Routes
+@app.route('/api/user/settings', methods=['GET', 'POST'])
+def user_settings():
+    """Get or save user settings"""
+    if request.method == 'GET':
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'Missing user_id'}), 400
+        
+        settings = db.get_user_settings(user_id)
+        if settings:
+            return jsonify({'success': True, 'settings': settings})
+        else:
+            # Return default settings
+            default_settings = {
+                'study_reminders': True,
+                'dark_mode': False,
+                'privacy_mode': False,
+                'notification_preferences': {},
+                'theme_preferences': {},
+                'study_schedule': {}
+            }
+            return jsonify({'success': True, 'settings': default_settings})
+    
+    elif request.method == 'POST':
+        data = request.get_json()
+        user_id = data.get('user_id')
+        settings = data.get('settings', {})
+        
+        if not user_id:
+            return jsonify({'error': 'Missing user_id'}), 400
+        
+        success = db.save_user_settings(user_id, settings)
+        if success:
+            # Log the settings change activity
+            db.log_user_activity(
+                user_id=user_id,
+                activity_type='settings_changed',
+                activity_data=settings
+            )
+            return jsonify({'success': True, 'message': 'Settings saved successfully'})
+        else:
+            return jsonify({'error': 'Failed to save settings'}), 500
+
+@app.route('/api/user/activity', methods=['POST'])
+def log_activity():
+    """Log user activity"""
+    data = request.get_json()
+    user_id = data.get('user_id')
+    activity_type = data.get('activity_type')
+    activity_data = data.get('activity_data', {})
+    exam = data.get('exam')
+    subject = data.get('subject')
+    topic = data.get('topic')
+    session_duration = data.get('session_duration', 0)
+    
+    if not user_id or not activity_type:
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    success = db.log_user_activity(
+        user_id=user_id,
+        activity_type=activity_type,
+        activity_data=activity_data,
+        exam=exam,
+        subject=subject,
+        topic=topic,
+        session_duration=session_duration
+    )
+    
+    if success:
+        return jsonify({'success': True, 'message': 'Activity logged successfully'})
+    else:
+        return jsonify({'error': 'Failed to log activity'}), 500
+
+@app.route('/api/user/study-session', methods=['POST'])
+def manage_study_session():
+    """Start or end study sessions"""
+    data = request.get_json()
+    action = data.get('action')  # 'start' or 'end'
+    user_id = data.get('user_id')
+    
+    if not user_id or not action:
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    if action == 'start':
+        exam = data.get('exam')
+        subject = data.get('subject')
+        topic = data.get('topic')
+        session_type = data.get('session_type', 'study')
+        
+        if not exam:
+            return jsonify({'error': 'Missing exam'}), 400
+        
+        session_id = db.start_study_session(user_id, exam, subject, topic, session_type)
+        if session_id:
+            return jsonify({
+                'success': True, 
+                'session_id': session_id,
+                'message': 'Study session started'
+            })
+        else:
+            return jsonify({'error': 'Failed to start study session'}), 500
+    
+    elif action == 'end':
+        session_id = data.get('session_id')
+        notes = data.get('notes')
+        
+        if not session_id:
+            return jsonify({'error': 'Missing session_id'}), 400
+        
+        duration = db.end_study_session(session_id, notes)
+        if duration is not None:
+            return jsonify({
+                'success': True,
+                'duration': duration,
+                'message': 'Study session ended'
+            })
+        else:
+            return jsonify({'error': 'Failed to end study session'}), 500
+    
+    else:
+        return jsonify({'error': 'Invalid action'}), 400
+
+@app.route('/api/user/statistics', methods=['GET'])
+def get_user_statistics():
+    """Get comprehensive user statistics"""
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Missing user_id'}), 400
+    
+    stats = db.get_user_statistics(user_id)
+    return jsonify({'success': True, 'statistics': stats})
+
+@app.route('/api/user/sync', methods=['POST'])
+def sync_user_data():
+    """Comprehensive sync endpoint for all user data"""
+    data = request.get_json()
+    user_id = data.get('user_id')
+    
+    if not user_id:
+        return jsonify({'error': 'Missing user_id'}), 400
+    
+    try:
+        # Sync settings if provided
+        if 'settings' in data:
+            db.save_user_settings(user_id, data['settings'])
+        
+        # Sync progress if provided
+        if 'progress' in data:
+            progress_data = data['progress']
+            for exam, subjects in progress_data.items():
+                for subject, chapters in subjects.items():
+                    for chapter, statuses in chapters.items():
+                        progress_entry = {
+                            'theory': statuses.get('Theory', False),
+                            'practice': statuses.get('Practice', False),
+                            'revision': statuses.get('Revision', False),
+                            'completed_at': datetime.datetime.now().isoformat() if any([
+                                statuses.get('Theory', False),
+                                statuses.get('Practice', False),
+                                statuses.get('Revision', False)
+                            ]) else None
+                        }
+                        db.save_user_progress(user_id, exam, subject, chapter, progress_entry)
+        
+        # Log sync activity
+        db.log_user_activity(
+            user_id=user_id,
+            activity_type='data_sync',
+            activity_data={'sync_timestamp': datetime.datetime.now().isoformat()}
+        )
+        
+        # Return updated statistics
+        stats = db.get_user_statistics(user_id)
+        settings = db.get_user_settings(user_id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Data synced successfully',
+            'statistics': stats,
+            'settings': settings or {}
+        })
+    
+    except Exception as e:
+        print(f"Sync error: {e}")
+        return jsonify({'error': 'Sync failed'}), 500
 
 if __name__ == '__main__':
     # Production configuration

@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - PrepDyno</title>
+    <title>Dashboard - ExamX</title>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
         * {
             margin: 0;
@@ -92,6 +94,88 @@
         .nav-btn:hover {
             background: rgba(0, 255, 136, 0.2);
             border-color: rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .study-timer-compact {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .timer-section {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .timer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #00ff88;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .timer-btn:hover {
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .github-nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .github-nav-link:hover {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
         }
@@ -336,16 +420,65 @@
     <div class="particles"></div>
     
     <nav class="nav-header">
-        <a href="/" class="nav-logo">PrepDyno</a>
+        <a href="/" class="nav-logo">ExamX</a>
         <div class="nav-menu">
-            <a href="/" class="nav-btn">🏠 Home</a>
-            <a href="/stats" class="nav-btn">📊 Stats</a>
-            <a href="/profile" class="nav-btn">👤 Profile</a>
+            <a href="/" class="nav-btn">
+                <i data-feather="home" style="width: 16px; height: 16px;"></i>
+                Home
+            </a>
+            <a href="/about" class="nav-btn">
+                <i data-feather="info" style="width: 16px; height: 16px;"></i>
+                About
+            </a>
+            <a href="/dashboard" class="nav-btn active">
+                <i data-feather="bar-chart-2" style="width: 16px; height: 16px;"></i>
+                Dashboard
+            </a>
+            <a href="/stats" class="nav-btn">
+                <i data-feather="trending-up" style="width: 16px; height: 16px;"></i>
+                Stats
+            </a>
+            <a href="/profile" class="nav-btn">
+                <i data-feather="user" style="width: 16px; height: 16px;"></i>
+                Profile
+            </a>
         </div>
-        <div class="user-section" id="userSection">
-            <div class="user-avatar" id="userAvatar">👤</div>
-            <span id="userName">User</span>
-            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        
+        <div class="nav-right">
+            <!-- Persistent Study Timer -->
+            <div class="study-timer-compact" id="studyTimer">
+                <div class="timer-section">
+                    <div class="timer-display" id="timerDisplay">00:00:00</div>
+                    <div class="timer-controls">
+                        <button class="timer-btn" id="playBtn" style="display: flex;">
+                            <i data-feather="play" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="timer-btn" id="pauseBtn" style="display: none;">
+                            <i data-feather="pause" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="timer-btn stop">
+                            <i data-feather="square" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- GitHub Link -->
+            <a href="https://github.com/Elctr0n/exam-tracker" target="_blank" class="github-nav-link">
+                <i data-feather="github" style="width: 18px; height: 18px;"></i>
+            </a>
+            
+            <!-- User Section -->
+            <div class="user-section">
+                <div class="user-avatar" id="userAvatar">
+                    <i data-feather="user" style="width: 20px; height: 20px;"></i>
+                </div>
+                <span id="userName">User</span>
+                <button class="logout-btn" onclick="handleLogout()">
+                    <i data-feather="log-out" style="width: 16px; height: 16px;"></i>
+                    Logout
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -357,7 +490,10 @@
 
         <div class="exam-section">
             <div class="section-header">
-                <h2 class="section-title">🎯 Select Exams to Track</h2>
+                <h2 class="section-title">
+                    <i data-feather="target" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+                    Select Exams to Track
+                </h2>
                 <span class="section-badge">Multiple Selection Supported</span>
             </div>
             <div class="exams-grid">
@@ -366,8 +502,10 @@
                         <input type="checkbox" id="exam-JEE" value="JEE" onchange="toggleExamSelection('JEE')">
                         <label for="exam-JEE"></label>
                     </div>
-                    <div class="exam-icon">⚛️</div>
-                    <div class="exam-title">JEE</div>
+                    <div class="exam-icon">
+                        <i data-feather="book-open" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <div class="exam-title">JEE Main & Advanced</div>
                     <div class="exam-subtitle">Joint Entrance Examination</div>
                 </div>
 
@@ -376,7 +514,9 @@
                         <input type="checkbox" id="exam-NEET" value="NEET" onchange="toggleExamSelection('NEET')">
                         <label for="exam-NEET"></label>
                     </div>
-                    <div class="exam-icon">🧬</div>
+                    <div class="exam-icon">
+                        <i data-feather="heart" style="width: 32px; height: 32px;"></i>
+                    </div>
                     <div class="exam-title">NEET-UG</div>
                     <div class="exam-subtitle">National Eligibility cum Entrance Test</div>
                 </div>
@@ -386,26 +526,31 @@
                         <input type="checkbox" id="exam-IAT" value="IAT" onchange="toggleExamSelection('IAT')">
                         <label for="exam-IAT"></label>
                     </div>
-                    <div class="exam-icon">🚀</div>
+                    <div class="exam-icon">
+                        <i data-feather="send" style="width: 32px; height: 32px;"></i>
+                    </div>
                     <div class="exam-title">IAT</div>
                     <div class="exam-subtitle">Indian Institute of Space Science and Technology Aptitude Test</div>
                 </div>
 
-                <div class="exam-card" data-exam="UGEE">
+                <div class="exam-card" data-exam="KEAM">
                     <div class="exam-checkbox">
-                        <input type="checkbox" id="exam-UGEE" value="UGEE" onchange="toggleExamSelection('UGEE')">
-                        <label for="exam-UGEE"></label>
+                        <input type="checkbox" id="exam-KEAM" value="KEAM" onchange="toggleExamSelection('KEAM')">
+                        <label for="exam-KEAM"></label>
                     </div>
-                    <div class="exam-icon">💡</div>
-                    <div class="exam-title">UGEE</div>
-                    <div class="exam-subtitle">Undergraduate Entrance Examination</div>
+                    <div class="exam-icon">
+                        <i data-feather="map" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <div class="exam-title">KEAM</div>
+                    <div class="exam-subtitle">Kerala Engineering Architecture Medical</div>
                 </div>
             </div>
             
             <div class="selection-actions">
                 <div class="selected-count" id="selectedCount">0 exams selected</div>
                 <button class="start-tracking-btn" id="startTrackingBtn" onclick="startMultipleExamTracking()" disabled>
-                    🚀 Start Tracking Selected Exams
+                    <i data-feather="play-circle" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
+                    Start Tracking Selected Exams
                 </button>
             </div>
         </div>
@@ -613,7 +758,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
             loadDashboard();
+            
+            // Initialize Feather icons
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
         });
     </script>
+    
+    <!-- Persistent Timer System -->
+    <script src="/static/js/persistent-timer.js"></script>
+    
+    <!-- Sync Manager for Server-Side Storage -->
+    <script src="/static/js/sync-manager.js"></script>
 </body>
 </html>

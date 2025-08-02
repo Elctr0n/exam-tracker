@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - ExamX</title>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+        }
+
+        .main-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 8rem 2rem 2rem;
+        }
+
+        .profile-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #0c0c0c;
+            font-weight: bold;
+        }
+
+        .profile-info h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-info p {
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .progress-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-item:last-child {
+            border-bottom: none;
+        }
+
+        .progress-info {
+            flex: 1;
+        }
+
+        .progress-name {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-percentage {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #00ff88;
+            margin-left: 1rem;
+        }
+
+        .recent-activity {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 255, 136, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        .settings-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .setting-info p {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 2px;
+            bottom: 2px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .toggle-switch.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .coming-soon-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Profile Tabs Styles */
+        .profile-tabs {
+            margin: 2rem 0;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 0.5rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Notifications Styles */
+        .notifications-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .notification-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+        }
+
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .notification-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .notification-icon.achievement {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #0c0c0c;
+        }
+
+        .notification-icon.progress {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+        }
+
+        .notification-icon.reminder {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+
+        .notification-content h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .notification-content p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* PYQs Styles */
+        .pyqs-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .pyqs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .pyq-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .pyq-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .pyq-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .pyq-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .pyq-count {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pyq-subjects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .subject-tag {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .pyq-years {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pyq-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pyq-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .pyq-btn.coming-soon {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+        }
+
+        .pyq-btn.coming-soon:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .settings-actions .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .settings-actions .btn-primary {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+        }
+
+        .settings-actions .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-actions .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .nav-header {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                padding: 6rem 1rem 2rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-stats {
+                justify-content: center;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+    
+    <!-- Navigation Header -->
+    <nav class="nav-header">
+        <a href="/" class="nav-logo">PrepDyno</a>
+        <div class="nav-menu">
+            <a href="/" class="nav-btn">🏠 Home</a>
+            <a href="/dashboard" class="nav-btn">🎯 Dashboard</a>
+            <a href="/profile" class="nav-btn active">👤 Profile</a>
+            <a href="#" class="nav-btn" onclick="showUpcoming('Leaderboard')">🏆 Leaderboard</a>
+            <a href="#" class="nav-btn" onclick="showUpcoming('Test')">📝 Test</a>
+            <a href="#" class="nav-btn" onclick="showUpcoming('Practice')">💪 Practice</a>
+            <a href="#" class="nav-btn" onclick="handleLogout()">🚪 Logout</a>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="userAvatar">
+                👤
+            </div>
+            <div class="profile-info">
+                <h1 id="userName">Student User</h1>
+                <p id="userEmail">student@example.com</p>
+                <p>Member since: <span id="memberSince">January 2024</span></p>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalExams">4</div>
+                        <div class="stat-label">Exams</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="completedTopics">127</div>
+                        <div class="stat-label">Topics Completed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="studyStreak">15</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalHours">48</div>
+                        <div class="stat-label">Study Hours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Progress Overview -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">Progress Overview</h2>
+                    <span class="card-icon">📊</span>
+                </div>
+                <div class="progress-list">
+                    <div class="progress-item">
+                        <div class="progress-info">
+                            <div class="progress-name">JEE Preparation</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-percentage">65%</div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-info">
+                            <div class="progress-name">NEET Preparation</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 42%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-percentage">42%</div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-info">
+                            <div class="progress-name">IAT Preparation</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 78%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-percentage">78%</div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-info">
+                            <div class="progress-name">UGEE Preparation</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 33%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-percentage">33%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Activity</h2>
+                    <span class="card-icon">🕒</span>
+                </div>
+                <ul class="recent-activity">
+                    <li class="activity-item">
+                        <div class="activity-icon">✅</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Completed Thermodynamics</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon">📚</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Started Organic Chemistry</div>
+                            <div class="activity-time">1 day ago</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon">🎯</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Achieved 15-day streak</div>
+                            <div class="activity-time">2 days ago</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon">🏆</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Completed Physics Module</div>
+                            <div class="activity-time">3 days ago</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Profile Tabs -->
+        <div class="profile-tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('dashboard')"><i data-lucide="home"></i> Dashboard</button>
+                <button class="tab-btn" onclick="switchTab('settings')"><i data-lucide="settings"></i> Settings</button>
+                <button class="tab-btn" onclick="switchTab('notifications')"><i data-lucide="bell"></i> Notifications</button>
+                <button class="tab-btn" onclick="switchTab('pyqs')"><i data-lucide="file-text"></i> PYQs</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab Content -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="dashboard-grid">
+                <!-- Progress Overview -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Progress Overview</h2>
+                        <span class="card-icon"><i data-lucide="trending-up"></i></span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="examCount">4</div>
+                            <div class="stat-label">Exams Tracked</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="completedTopics">0</div>
+                            <div class="stat-label">Topics Completed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="studyStreak">0</div>
+                            <div class="stat-label">Study Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="studyHours">0</div>
+                            <div class="stat-label">Study Hours</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exam Progress -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Exam Progress</h2>
+                        <span class="card-icon"><i data-lucide="bar-chart-3"></i></span>
+                    </div>
+                    <div class="progress-list" id="examProgressList">
+                        <!-- Dynamic exam progress will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recent Activity</h2>
+                        <span class="card-icon"><i data-lucide="activity"></i></span>
+                    </div>
+                    <ul class="activity-list" id="recentActivityList">
+                        <!-- Dynamic recent activity will be loaded here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab Content -->
+        <div id="settings-tab" class="tab-content">
+            <div class="settings-section">
+                <div class="card-header">
+                    <h2 class="card-title">Account Settings</h2>
+                    <span class="card-icon"><i data-lucide="settings"></i></span>
+                </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Email Notifications</h3>
+                    <p>Receive progress updates and reminders via email</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" data-setting="notifications" onchange="handleSettingChange(this)" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Daily Reminders</h3>
+                    <p>Get daily study reminders and motivational messages</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" data-setting="reminders" onchange="handleSettingChange(this)" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Progress Sharing</h3>
+                    <p>Allow others to see your progress on leaderboards</p>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+                <label class="toggle-switch disabled">
+                    <input type="checkbox" data-setting="progressSharing" disabled>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Dark Mode</h3>
+                    <p>Use dark theme for better viewing experience</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" data-setting="darkMode" onchange="handleDarkModeToggle(this)" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Auto-Save Progress</h3>
+                    <p>Automatically save your progress while studying</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" data-setting="autoSave" onchange="handleSettingChange(this)" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Study Streak Notifications</h3>
+                    <p>Get notified about your study streaks and milestones</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" data-setting="streakNotifications" onchange="handleSettingChange(this)" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Performance Analytics</h3>
+                    <p>Track detailed analytics of your study performance</p>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+                <label class="toggle-switch disabled">
+                    <input type="checkbox" data-setting="analytics" disabled>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Offline Mode</h3>
+                    <p>Access your progress and study materials offline</p>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+                <label class="toggle-switch disabled">
+                    <input type="checkbox" data-setting="offlineMode" disabled>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="settings-actions">
+                <button class="btn btn-primary" onclick="saveAllSettings()">💾 Save Settings</button>
+                <button class="btn btn-secondary" onclick="resetSettings()">🔄 Reset to Default</button>
+            </div>
+        </div>
+        </div>
+
+        <!-- Notifications Tab Content -->
+        <div id="notifications-tab" class="tab-content">
+            <div class="notifications-section">
+                <div class="card-header">
+                    <h2 class="card-title">Notifications</h2>
+                    <span class="card-icon"><i data-lucide="bell"></i></span>
+                </div>
+                
+                <div class="notification-filters">
+                    <button class="filter-btn active" onclick="filterNotifications('all')">All</button>
+                    <button class="filter-btn" onclick="filterNotifications('progress')">Progress</button>
+                    <button class="filter-btn" onclick="filterNotifications('reminders')">Reminders</button>
+                    <button class="filter-btn" onclick="filterNotifications('achievements')">Achievements</button>
+                </div>
+                
+                <div class="notifications-list" id="notificationsList">
+                    <!-- Notifications will be dynamically loaded here -->
+                    <div class="no-notifications" id="noNotifications" style="text-align: center; padding: 40px; color: #888;">
+                        <i data-lucide="bell-off" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <p>No notifications yet. Start studying to see your progress updates and achievements!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PYQs Tab Content -->
+        <div id="pyqs-tab" class="tab-content">
+            <div class="pyqs-section">
+                <div class="card-header">
+                    <h2 class="card-title">Previous Year Questions (PYQs)</h2>
+                    <span class="card-icon"><i data-lucide="file-text"></i></span>
+                </div>
+                
+                <div class="pyqs-grid">
+                    <div class="pyq-card">
+                        <div class="pyq-header">
+                            <h3><i data-lucide="atom"></i> JEE Main & Advanced</h3>
+                            <span class="pyq-count">2000+ Questions</span>
+                        </div>
+                        <div class="pyq-subjects">
+                            <span class="subject-tag">Physics</span>
+                            <span class="subject-tag">Chemistry</span>
+                            <span class="subject-tag">Mathematics</span>
+                        </div>
+                        <div class="pyq-years">2015-2024 Papers Available</div>
+                        <button class="pyq-btn" onclick="accessPYQs('JEE')">Access PYQs</button>
+                    </div>
+                    
+                    <div class="pyq-card">
+                        <div class="pyq-header">
+                            <h3><i data-lucide="dna"></i> NEET</h3>
+                            <span class="pyq-count">1800+ Questions</span>
+                        </div>
+                        <div class="pyq-subjects">
+                            <span class="subject-tag">Physics</span>
+                            <span class="subject-tag">Chemistry</span>
+                            <span class="subject-tag">Biology</span>
+                        </div>
+                        <div class="pyq-years">2016-2024 Papers Available</div>
+                        <button class="pyq-btn" onclick="accessPYQs('NEET')">Access PYQs</button>
+                    </div>
+                    
+                    <div class="pyq-card">
+                        <div class="pyq-header">
+                            <h3><i data-lucide="rocket"></i> IAT</h3>
+                            <span class="pyq-count">500+ Questions</span>
+                        </div>
+                        <div class="pyq-subjects">
+                            <span class="subject-tag">Physics</span>
+                            <span class="subject-tag">Chemistry</span>
+                            <span class="subject-tag">Mathematics</span>
+                            <span class="subject-tag">Biology</span>
+                        </div>
+                        <div class="pyq-years">2018-2024 Papers Available</div>
+                        <button class="pyq-btn coming-soon" onclick="showUpcoming('IAT PYQs')">Coming Soon</button>
+                    </div>
+                    
+                    <div class="pyq-card">
+                        <div class="pyq-header">
+                            <h3><i data-lucide="lightbulb"></i> UGEE</h3>
+                            <span class="pyq-count">400+ Questions</span>
+                        </div>
+                        <div class="pyq-subjects">
+                            <span class="subject-tag">Mathematics</span>
+                            <span class="subject-tag">Physics</span>
+                            <span class="subject-tag">Research Aptitude</span>
+                        </div>
+                        <div class="pyq-years">2019-2024 Papers Available</div>
+                        <button class="pyq-btn coming-soon" onclick="showUpcoming('UGEE PYQs')">Coming Soon</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">📚 Continue Learning</a>
+            <a href="#" class="btn btn-secondary" onclick="editProfile()">✏️ Edit Profile</a>
+            <a href="#" class="btn btn-secondary" onclick="exportData()">📥 Export Data</a>
+            <a href="#" class="btn btn-danger" onclick="deleteAccount()">🗑️ Delete Account</a>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication and load real user data
+        function checkAuthAndLoadProfile() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            if (userSession !== 'true' || !sessionExpiry || currentTime >= parseInt(sessionExpiry) || !userData.uid) {
+                // Redirect to login if not authenticated or session expired
+                window.location.href = '/login?redirect=/profile';
+                return;
+            }
+            
+            // Load real user data into profile
+            loadUserProfile(userData);
+        }
+        
+        // Load real user profile data
+        function loadUserProfile(userData) {
+            const progressKey = localStorage.getItem('currentUserProgress');
+            const userProgress = JSON.parse(localStorage.getItem(progressKey) || '{}');
+            
+            // Update user info section with correct selectors
+            document.getElementById('userName').textContent = userData.displayName || 'Student';
+            document.getElementById('userEmail').textContent = userData.email;
+            document.getElementById('memberSince').textContent = new Date(userData.creationTime).toLocaleDateString();
+            
+            // Update profile avatar
+            const avatar = document.getElementById('userAvatar');
+            if (userData.photoURL) {
+                avatar.innerHTML = `<img src="${userData.photoURL}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                avatar.textContent = (userData.displayName || userData.email).charAt(0).toUpperCase();
+            }
+            
+            // Load real statistics
+            loadUserStatistics(userProgress);
+            
+            // Load real exam progress
+            loadExamProgress(userProgress);
+            
+            // Load real recent activity
+            loadRecentActivity(userProgress);
+            
+            // Load user preferences
+            loadUserPreferences(userProgress.preferences || {});
+            
+            // Load real notifications
+            loadUserNotifications(userProgress);
+        }
+        
+        // Load real user notifications based on progress and achievements
+        function loadUserNotifications(userProgress) {
+            const notificationsList = document.getElementById('notificationsList');
+            const noNotifications = document.getElementById('noNotifications');
+            const notifications = [];
+            
+            // Generate notifications based on real user data
+            const stats = userProgress.statistics || {};
+            const exams = userProgress.exams || {};
+            const recentActivity = userProgress.recentActivity || [];
+            
+            // Achievement notifications based on real progress
+            if (stats.completedTopics >= 1) {
+                notifications.push({
+                    type: 'achievement',
+                    icon: 'trophy',
+                    title: 'First Topic Completed!',
+                    message: `Great start! You've completed your first topic.`,
+                    time: getRelativeTime(recentActivity[0]?.timestamp)
+                });
+            }
+            
+            if (stats.completedTopics >= 10) {
+                notifications.push({
+                    type: 'achievement',
+                    icon: 'star',
+                    title: 'Topic Master!',
+                    message: `Amazing progress! You've completed ${stats.completedTopics} topics.`,
+                    time: getRelativeTime(recentActivity[0]?.timestamp)
+                });
+            }
+            
+            if (stats.studyStreak >= 3) {
+                notifications.push({
+                    type: 'achievement',
+                    icon: 'flame',
+                    title: 'Study Streak!',
+                    message: `You're on fire! ${stats.studyStreak} days study streak.`,
+                    time: getRelativeTime(recentActivity[0]?.timestamp)
+                });
+            }
+            
+            // Progress notifications for each exam
+            Object.entries(exams).forEach(([examName, examData]) => {
+                const totalTopics = calculateTotalTopics(examData);
+                const completedTopics = calculateCompletedTopics(examData);
+                const progressPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+                
+                if (progressPercent >= 25) {
+                    notifications.push({
+                        type: 'progress',
+                        icon: 'trending-up',
+                        title: 'Progress Update',
+                        message: `You're ${progressPercent}% done with ${examName.toUpperCase()} syllabus`,
+                        time: getRelativeTime(recentActivity.find(a => a.exam === examName)?.timestamp)
+                    });
+                }
+            });
+            
+            // Study reminders based on user settings
+            const preferences = userProgress.preferences || {};
+            if (preferences.dailyReminders && stats.lastStudyDate) {
+                const lastStudy = new Date(stats.lastStudyDate);
+                const daysSinceStudy = Math.floor((new Date() - lastStudy) / (1000 * 60 * 60 * 24));
+                
+                if (daysSinceStudy >= 1) {
+                    notifications.push({
+                        type: 'reminders',
+                        icon: 'clock',
+                        title: 'Study Reminder',
+                        message: `Time to continue your studies! Last session was ${daysSinceStudy} day${daysSinceStudy > 1 ? 's' : ''} ago.`,
+                        time: getRelativeTime(stats.lastStudyDate)
+                    });
+                }
+            }
+            
+            // Display notifications or show empty state
+            if (notifications.length === 0) {
+                noNotifications.style.display = 'block';
+                return;
+            }
+            
+            noNotifications.style.display = 'none';
+            notificationsList.innerHTML = '';
+            
+            // Sort notifications by relevance (achievements first, then by recency)
+            notifications.sort((a, b) => {
+                if (a.type === 'achievement' && b.type !== 'achievement') return -1;
+                if (b.type === 'achievement' && a.type !== 'achievement') return 1;
+                return 0;
+            });
+            
+            // Display notifications
+            notifications.slice(0, 10).forEach(notification => {
+                const notificationElement = document.createElement('div');
+                notificationElement.className = 'notification-item';
+                notificationElement.setAttribute('data-type', notification.type);
+                
+                notificationElement.innerHTML = `
+                    <div class="notification-icon ${notification.type}">
+                        <i data-lucide="${notification.icon}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>${notification.title}</h4>
+                        <p>${notification.message}</p>
+                        <span class="notification-time">${notification.time || 'Recently'}</span>
+                    </div>
+                `;
+                
+                notificationsList.appendChild(notificationElement);
+            });
+            
+            // Re-initialize Lucide icons for new notifications
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+        
+        function getRelativeTime(timestamp) {
+            if (!timestamp) return 'Recently';
+            
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diffMs = now - time;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+            return time.toLocaleDateString();
+        }
+        
+        // Load real user statistics
+        function loadUserStatistics(userProgress) {
+            const stats = userProgress.statistics || {};
+            const examCount = Object.keys(userProgress.exams || {}).length;
+            
+            document.getElementById('totalExams').textContent = examCount;
+            document.getElementById('completedTopics').textContent = stats.completedTopics || 0;
+            document.getElementById('studyStreak').textContent = stats.studyStreak || 0;
+            document.getElementById('totalHours').textContent = Math.round(stats.totalStudyHours || 0);
+        }
+        
+        // Load real exam progress
+        function loadExamProgress(userProgress) {
+            const progressContainer = document.querySelector('.progress-list');
+            const exams = userProgress.exams || {};
+            
+            if (Object.keys(exams).length === 0) {
+                progressContainer.innerHTML = '<div class="no-progress">No exam progress yet. <a href="/" style="color: #00ff88;">Start tracking an exam</a></div>';
+                return;
+            }
+            
+            progressContainer.innerHTML = '';
+            
+            Object.entries(exams).forEach(([examName, examData]) => {
+                const totalTopics = calculateTotalTopics(examData);
+                const completedTopics = calculateCompletedTopics(examData);
+                const progressPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+                
+                const progressItem = document.createElement('div');
+                progressItem.className = 'progress-item';
+                progressItem.innerHTML = `
+                    <div class="progress-header">
+                        <span class="exam-name">${examName.toUpperCase()}</span>
+                        <span class="progress-percent">${progressPercent}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="progress-details">
+                        <span>${completedTopics}/${totalTopics} topics completed</span>
+                        <span>Last updated: ${new Date(examData.lastUpdated || Date.now()).toLocaleDateString()}</span>
+                    </div>
+                `;
+                progressContainer.appendChild(progressItem);
+            });
+        }
+        
+        // Calculate total topics in an exam
+        function calculateTotalTopics(examData) {
+            let total = 0;
+            Object.values(examData.subjects || {}).forEach(subject => {
+                Object.values(subject.chapters || {}).forEach(chapter => {
+                    total += Object.keys(chapter.topics || {}).length;
+                });
+            });
+            return total;
+        }
+        
+        // Calculate completed topics in an exam
+        function calculateCompletedTopics(examData) {
+            let completed = 0;
+            Object.values(examData.subjects || {}).forEach(subject => {
+                Object.values(subject.chapters || {}).forEach(chapter => {
+                    Object.values(chapter.topics || {}).forEach(topic => {
+                        if (topic.theory === 'completed' && topic.practice === 'completed' && topic.revision === 'completed') {
+                            completed++;
+                        }
+                    });
+                });
+            });
+            return completed;
+        }
+        
+        // Load real recent activity
+        function loadRecentActivity(userProgress) {
+            const activityContainer = document.querySelector('.recent-activity');
+            const recentActivities = userProgress.recentActivity || [];
+            
+            if (recentActivities.length === 0) {
+                activityContainer.innerHTML = '<li class="activity-item"><div class="activity-icon">📚</div><div class="activity-content"><div class="activity-title">No recent activity yet</div><div class="activity-time">Start studying to see your progress here!</div></div></li>';
+                return;
+            }
+            
+            activityContainer.innerHTML = '';
+            
+            recentActivities.slice(0, 10).forEach(activity => {
+                const activityItem = document.createElement('li');
+                activityItem.className = 'activity-item';
+                activityItem.innerHTML = `
+                    <div class="activity-icon">📚</div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.description}</div>
+                        <div class="activity-time">${new Date(activity.timestamp).toLocaleString()}</div>
+                    </div>
+                `;
+                activityContainer.appendChild(activityItem);
+            });
+        }
+        
+        // Load user preferences
+        function loadUserPreferences(preferences) {
+            const toggles = {
+                'notifications': preferences.notifications !== false,
+                'reminders': preferences.reminders !== false,
+                'darkMode': preferences.darkMode !== false,
+                'autoSave': preferences.autoSave !== false,
+                'streakNotifications': preferences.streakNotifications !== false
+            };
+            
+            Object.entries(toggles).forEach(([key, value]) => {
+                const toggle = document.querySelector(`[data-setting="${key}"]`);
+                if (toggle) {
+                    toggle.checked = value;
+                }
+            });
+        }
+        
+        // Handle setting changes
+        function handleSettingChange(toggle) {
+            const setting = toggle.dataset.setting;
+            const isEnabled = toggle.checked;
+            
+            // Get current user progress
+            const progressKey = localStorage.getItem('currentUserProgress');
+            const userProgress = JSON.parse(localStorage.getItem(progressKey) || '{}');
+            
+            // Update preferences
+            if (!userProgress.preferences) {
+                userProgress.preferences = {};
+            }
+            userProgress.preferences[setting] = isEnabled;
+            userProgress.lastUpdated = new Date().toISOString();
+            
+            // Save updated preferences
+            localStorage.setItem(progressKey, JSON.stringify(userProgress));
+            
+            // Show feedback
+            showSettingFeedback(setting, isEnabled);
+        }
+        
+        // Handle dark mode toggle with humorous popup
+        function handleDarkModeToggle(toggle) {
+            const isEnabled = toggle.checked;
+            
+            if (!isEnabled) {
+                // Show humorous popup for light mode
+                showLightModePopup();
+                // Revert the toggle back to dark mode
+                setTimeout(() => {
+                    toggle.checked = true;
+                }, 100);
+                return;
+            }
+            
+            // Handle normal dark mode setting
+            handleSettingChange(toggle);
+        }
+        
+        // Show humorous light mode popup
+        function showLightModePopup() {
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #ff6b6b, #ffa500, #ff6b6b);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                text-align: center;
+                max-width: 400px;
+                animation: popupBounce 0.5s ease-out;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            `;
+            
+            popup.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 15px;">🌞😎</div>
+                <h3 style="margin-bottom: 15px; font-size: 1.3rem;">Hold Up There, Sunshine! ☀️</h3>
+                <p style="margin-bottom: 20px; line-height: 1.5;">You didn't like dark mode? So do many people, but it is what it is. We were <strong>NOT</strong> switching to light mode! 😄</p>
+                <p style="margin-bottom: 20px; font-size: 0.9rem; opacity: 0.9;">Dark mode is the way of the future, and your eyes will thank you later! 🌙✨</p>
+                <button onclick="closeLightModePopup()" style="
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                    Fine, I'll Stay Dark! 🌚
+                </button>
+            `;
+            
+            // Add animation keyframes
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes popupBounce {
+                    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                    50% { transform: translate(-50%, -50%) scale(1.1); }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(popup);
+            popup.id = 'lightModePopup';
+        }
+        
+        // Close light mode popup
+        function closeLightModePopup() {
+            const popup = document.getElementById('lightModePopup');
+            if (popup) {
+                popup.style.animation = 'popupBounce 0.3s ease-in reverse';
+                setTimeout(() => {
+                    popup.remove();
+                }, 300);
+            }
+        }
+        
+        // Show setting feedback
+        function showSettingFeedback(setting, isEnabled) {
+            const messages = {
+                'notifications': isEnabled ? '📧 Email notifications enabled!' : '📧 Email notifications disabled',
+                'reminders': isEnabled ? '⏰ Daily reminders enabled!' : '⏰ Daily reminders disabled',
+                'autoSave': isEnabled ? '💾 Auto-save enabled!' : '💾 Auto-save disabled',
+                'streakNotifications': isEnabled ? '🔥 Streak notifications enabled!' : '🔥 Streak notifications disabled'
+            };
+            
+            const message = messages[setting] || `${setting} ${isEnabled ? 'enabled' : 'disabled'}`;
+            
+            // Create temporary feedback element
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, #00ff88, #00d4ff);
+                color: #0c0c0c;
+                padding: 15px 20px;
+                border-radius: 10px;
+                font-weight: bold;
+                z-index: 9999;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+            `;
+            feedback.textContent = message;
+            
+            document.body.appendChild(feedback);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                feedback.style.animation = 'slideIn 0.3s ease-in reverse';
+                setTimeout(() => feedback.remove(), 300);
+            }, 3000);
+        }
+        
+        // Save all settings
+        function saveAllSettings() {
+            const progressKey = localStorage.getItem('currentUserProgress');
+            const userProgress = JSON.parse(localStorage.getItem(progressKey) || '{}');
+            
+            // Collect all settings
+            const settings = {};
+            document.querySelectorAll('[data-setting]').forEach(toggle => {
+                if (!toggle.disabled) {
+                    settings[toggle.dataset.setting] = toggle.checked;
+                }
+            });
+            
+            // Update user progress
+            userProgress.preferences = { ...userProgress.preferences, ...settings };
+            userProgress.lastUpdated = new Date().toISOString();
+            
+            // Save to localStorage
+            localStorage.setItem(progressKey, JSON.stringify(userProgress));
+            
+            // Show success message
+            showSettingFeedback('all', true);
+            
+            // Create success popup
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #00ff88, #00d4ff);
+                color: #0c0c0c;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+                z-index: 10000;
+                text-align: center;
+                font-weight: bold;
+                animation: popupBounce 0.5s ease-out;
+            `;
+            popup.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+                <h3>Settings Saved Successfully!</h3>
+                <p style="margin-top: 10px; opacity: 0.8;">Your preferences have been updated</p>
+            `;
+            
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 2000);
+        }
+        
+        // Reset settings to default
+        function resetSettings() {
+            if (confirm('Are you sure you want to reset all settings to default? This cannot be undone.')) {
+                const defaultSettings = {
+                    notifications: true,
+                    reminders: true,
+                    darkMode: true,
+                    autoSave: true,
+                    streakNotifications: true
+                };
+                
+                // Update toggles
+                Object.entries(defaultSettings).forEach(([key, value]) => {
+                    const toggle = document.querySelector(`[data-setting="${key}"]`);
+                    if (toggle && !toggle.disabled) {
+                        toggle.checked = value;
+                    }
+                });
+                
+                // Save to localStorage
+                const progressKey = localStorage.getItem('currentUserProgress');
+                const userProgress = JSON.parse(localStorage.getItem(progressKey) || '{}');
+                userProgress.preferences = defaultSettings;
+                userProgress.lastUpdated = new Date().toISOString();
+                localStorage.setItem(progressKey, JSON.stringify(userProgress));
+                
+                // Show success message
+                showSettingFeedback('reset', true);
+            }
+        }
+        
+        // Save user preferences
+        function savePreferences() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const progressKey = localStorage.getItem('currentUserProgress');
+            const userProgress = JSON.parse(localStorage.getItem(progressKey) || '{}');
+            
+            const preferences = {
+                notifications: document.querySelector('[data-setting="notifications"]').checked,
+                reminders: document.querySelector('[data-setting="reminders"]').checked,
+                darkMode: document.querySelector('[data-setting="darkMode"]').checked,
+                autoSave: document.querySelector('[data-setting="autoSave"]').checked
+            };
+            
+            userProgress.preferences = preferences;
+            userProgress.lastUpdated = new Date().toISOString();
+            localStorage.setItem(progressKey, JSON.stringify(userProgress));
+            
+            alert('Preferences saved successfully!');
+        }
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('userLoggedIn');
+                localStorage.removeItem('userData');
+                localStorage.removeItem('currentUserProgress');
+                window.location.href = '/login';
+            }
+        }
+        
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected tab and button
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Initialize Lucide icons for the new tab
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Notifications filtering
+        function filterNotifications(type) {
+            const notifications = document.querySelectorAll('.notification-item');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            // Update filter button states
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide notifications based on type
+            notifications.forEach(notification => {
+                if (type === 'all' || notification.dataset.type === type) {
+                    notification.style.display = 'flex';
+                } else {
+                    notification.style.display = 'none';
+                }
+            });
+        }
+
+        // PYQs access functionality
+        function accessPYQs(exam) {
+            if (exam === 'JEE' || exam === 'NEET') {
+                alert(`Accessing ${exam} Previous Year Questions...\n\nThis feature will redirect you to our comprehensive PYQs database with:\n\n• Topic-wise questions\n• Year-wise papers\n• Detailed solutions\n• Performance analytics\n\nComing soon in the next update!`);
+            } else {
+                showUpcoming(`${exam} PYQs`);
+            }
+        }
+
+        // Initialize profile on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthAndLoadProfile();
+            
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+        
+        // Particle animation
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 50;
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.random() * 2 + 1
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                
+                if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
+                if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+                
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 255, 136, 0.3)';
+                ctx.fill();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        function showUpcoming(feature) {
+            alert(`${feature} feature is coming soon! Stay tuned for updates.`);
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('userLoggedIn');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                window.location.href = '/login';
+            }
+        }
+
+        function toggleSetting(toggle) {
+            toggle.classList.toggle('active');
+        }
+
+        function editProfile() {
+            alert('Profile editing feature coming soon!');
+        }
+
+        function exportData() {
+            alert('Data export feature coming soon!');
+        }
+
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                alert('Account deletion feature coming soon!');
+            }
+        }
+
+        // Load user data from localStorage or Firebase
+        function loadUserData() {
+            const userName = localStorage.getItem('userName') || 'Student User';
+            const userEmail = localStorage.getItem('userEmail') || 'student@example.com';
+            
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userEmail').textContent = userEmail;
+            
+            // Set avatar initial
+            const avatar = document.getElementById('userAvatar');
+            avatar.textContent = userName.charAt(0).toUpperCase();
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadUserData();
+        });
+    </script>
+</body>
+</html>

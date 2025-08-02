@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - ExamX Smart Exam Tracker</title>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12, 12, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 1rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff, #ff0080);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Content Sections */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .feature-list li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .tech-item {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.05);
+        }
+
+        .tech-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-value {
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        /* Exam Coverage */
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .exam-card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .exam-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 255, 136, 0.2);
+        }
+
+        .exam-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+        }
+
+        .exam-stats {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .status-active {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            padding: 0.2rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        /* Contribution Section */
+        .contribution-section {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(255, 0, 128, 0.1));
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 25px;
+            padding: 3rem;
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .contribution-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #ff0080);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .contribution-text {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .github-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .github-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(0, 255, 136, 0.5);
+        }
+
+        .github-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid rgba(0, 255, 136, 0.2);
+            margin-top: 4rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu {
+                gap: 1rem;
+            }
+            
+            .contribution-section {
+                padding: 2rem;
+            }
+            
+            .contribution-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-header">
+        <a href="/" class="nav-logo">ExamX</a>
+        <div class="nav-menu">
+            <a href="/" class="nav-btn">Home</a>
+            <a href="/about" class="nav-btn active">About</a>
+            <a href="/dashboard" class="nav-btn">Dashboard</a>
+            <a href="/login" class="nav-btn">Login</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="version-badge">Version {{ app_info.version }}</div>
+            <h1 class="hero-title">{{ app_info.name }}</h1>
+            <p class="hero-subtitle">{{ app_info.description }}</p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(255, 0, 128, 0.1)); border: 2px solid rgba(0, 255, 136, 0.3); border-radius: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <i data-feather="heart" style="color: #ff0080; width: 24px; height: 24px;"></i>
+                <span style="font-size: 1.2rem; font-weight: 700; background: linear-gradient(45deg, #00ff88, #ff0080); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Made by a Student, for Students</span>
+                <i data-feather="users" style="color: #00ff88; width: 24px; height: 24px;"></i>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Features Card -->
+            <div class="content-card">
+                <h2 class="card-title">
+                    <i data-feather="zap" class="card-icon" style="width: 24px; height: 24px; color: #00ff88;"></i>
+                    Key Features
+                </h2>
+                <ul class="feature-list">
+                    {% for feature in app_info.features %}
+                    <li>{{ feature }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Tech Stack Card -->
+            <div class="content-card">
+                <h2 class="card-title">
+                    <i data-feather="cpu" class="card-icon" style="width: 24px; height: 24px; color: #00ff88;"></i>
+                    Technology Stack
+                </h2>
+                <div class="tech-grid">
+                    {% for tech, value in app_info.tech_stack.items() %}
+                    <div class="tech-item">
+                        <div class="tech-label">{{ tech }}</div>
+                        <div class="tech-value">{{ value }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam Coverage -->
+        <div class="content-card">
+            <h2 class="card-title">
+                <i data-feather="book-open" class="card-icon" style="width: 24px; height: 24px; color: #00ff88;"></i>
+                Exam Coverage & Statistics
+            </h2>
+            <div class="exam-grid">
+                {% for exam, data in app_info.exam_coverage.items() %}
+                <div class="exam-card">
+                    <div class="exam-name">{{ exam }}</div>
+                    <div class="exam-stats">
+                        {{ data.subjects }} Subjects<br>
+                        {{ data.topics }} Topics
+                    </div>
+                    <div class="status-active">{{ data.status }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="content-card">
+            <h2 class="card-title">
+                <i data-feather="target" class="card-icon" style="width: 24px; height: 24px; color: #00ff88;"></i>
+                How ExamX Works
+            </h2>
+            <div style="color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+                <p><strong>1. Choose Your Exam:</strong> Select from JEE, NEET, IAT, or KEAM with comprehensive syllabus coverage.</p><br>
+                <p><strong>2. Track Progress:</strong> Monitor your preparation across Theory, Practice, and Revision for each topic.</p><br>
+                <p><strong>3. Study Timer:</strong> Built-in timer tracks your study sessions and maintains statistics.</p><br>
+                <p><strong>4. Real-time Analytics:</strong> Get instant feedback on your progress with visual completion percentages.</p><br>
+                <p><strong>5. Cloud Sync:</strong> Your progress is automatically saved to the cloud and synced across devices.</p><br>
+                <p><strong>6. Smart Dashboard:</strong> Personalized dashboard shows your exam selection and overall progress.</p>
+            </div>
+        </div>
+
+        <!-- Upcoming Features -->
+        <div class="content-card">
+            <h2 class="card-title">
+                <i data-feather="clock" class="card-icon" style="width: 24px; height: 24px; color: #00d4ff;"></i>
+                Upcoming Features
+            </h2>
+            <div style="color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 1rem 0;">
+                    <div style="background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 15px; padding: 1.5rem;">
+                        <h3 style="color: #00ff88; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-feather="bar-chart-2" style="width: 20px; height: 20px;"></i>
+                            Progress Analytics
+                        </h3>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">📈 Weekly/Monthly progress charts</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">🔥 Study streak tracking</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">📊 Subject-wise heatmaps</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 15px; padding: 1.5rem;">
+                        <h3 style="color: #00d4ff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-feather="brain" style="width: 20px; height: 20px;"></i>
+                            Smart Features
+                        </h3>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">🤖 AI-powered study recommendations</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">🎯 Weak areas identification</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">⏰ Optimal schedule generation</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(255, 0, 128, 0.05); border: 1px solid rgba(255, 0, 128, 0.2); border-radius: 15px; padding: 1.5rem;">
+                        <h3 style="color: #ff0080; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-feather="users" style="width: 20px; height: 20px;"></i>
+                            Social Learning
+                        </h3>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">👥 Study groups creation</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">🏆 Leaderboards & challenges</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">💬 Discussion forums</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(255, 165, 0, 0.05); border: 1px solid rgba(255, 165, 0, 0.2); border-radius: 15px; padding: 1.5rem;">
+                        <h3 style="color: #ffa500; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-feather="smartphone" style="width: 20px; height: 20px;"></i>
+                            Mobile Experience
+                        </h3>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">📱 Progressive Web App (PWA)</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">🔔 Push notifications</li>
+                            <li style="padding: 0.3rem 0; color: rgba(255, 255, 255, 0.8);">📴 Offline study tracking</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 2rem; padding: 1rem; background: rgba(0, 255, 136, 0.1); border-radius: 15px;">
+                    <p style="color: #00ff88; font-weight: 600; margin-bottom: 0.5rem;">🚀 Want to help build these features?</p>
+                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Join our open-source community and contribute to making exam preparation better for everyone!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contribution Section -->
+        <div class="contribution-section">
+            <h2 class="contribution-title">Open Source & Contributions</h2>
+            <p class="contribution-text">
+                PrepDyno is an open-source project built with ❤️ for students. We believe in the power of community-driven development 
+                to create better educational tools. Whether you're a developer, designer, educator, or student, your contributions 
+                can help thousands of students achieve their academic goals.
+            </p>
+            <p class="contribution-text">
+                <strong>Ways to contribute:</strong> Bug reports, feature requests, code improvements, UI/UX enhancements, 
+                documentation, syllabus updates, or simply sharing feedback from your exam preparation journey.
+            </p>
+            <a href="{{ app_info.github_url }}" target="_blank" class="github-btn">
+                <i data-feather="github" class="github-icon" style="width: 24px; height: 24px;"></i>
+                Contribute on GitHub
+            </a>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="content-grid">
+            <div class="content-card">
+                <h2 class="card-title">
+                    <i data-feather="shield" class="card-icon" style="width: 24px; height: 24px; color: #00ff88;"></i>
+                    Privacy & Security
+                </h2>
+                <ul class="feature-list">
+                    <li>Firebase Authentication for secure login</li>
+                    <li>Encrypted data transmission</li>
+                    <li>No personal data selling</li>
+                    <li>GDPR compliant data handling</li>
+                    <li>Local session management</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h2 class="card-title">
+                    <i data-feather="monitor" class="card-icon" style="width: 24px; height: 24px; color: #00ff88;"></i>
+                    Platform Support
+                </h2>
+                <ul class="feature-list">
+                    <li>Responsive web design</li>
+                    <li>Mobile-friendly interface</li>
+                    <li>Cross-browser compatibility</li>
+                    <li>Offline progress tracking</li>
+                    <li>PWA capabilities (coming soon)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Me Section -->
+    <div class="container">
+        <div class="content-card" style="margin-top: 3rem;">
+            <h2 class="card-title">
+                <i data-feather="users" class="card-icon" style="width: 24px; height: 24px; color: #ff0080;"></i>
+                About the Team
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                <!-- User Contribution -->
+                <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1)); border: 2px solid rgba(0, 255, 136, 0.3); border-radius: 20px; padding: 2rem;">
+                    <h3 style="color: #00ff88; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-feather="user" style="width: 20px; height: 20px;"></i>
+                        Project Creator & Vision
+                    </h3>
+                    <div style="color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+                        <p style="margin-bottom: 1rem;"><strong>The Student Behind ExamX</strong></p>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="lightbulb" style="width: 16px; height: 16px; color: #00ff88;"></i>
+                                <span>Conceptualized the idea of a comprehensive exam tracker</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="target" style="width: 16px; height: 16px; color: #00ff88;"></i>
+                                <span>Defined the core philosophy: "Made by a Student, for Students"</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="book-open" style="width: 16px; height: 16px; color: #00ff88;"></i>
+                                <span>Provided comprehensive syllabus requirements for JEE, NEET, IAT, KEAM</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="settings" style="width: 16px; height: 16px; color: #00ff88;"></i>
+                                <span>Guided feature requirements and user experience design</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="database" style="width: 16px; height: 16px; color: #00ff88;"></i>
+                                <span>Managed deployment infrastructure and database migration</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="github" style="width: 16px; height: 16px; color: #00ff88;"></i>
+                                <span>Established open-source repository and community guidelines</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- AI Assistant Contribution -->
+                <div style="background: linear-gradient(135deg, rgba(255, 0, 128, 0.1), rgba(0, 212, 255, 0.1)); border: 2px solid rgba(255, 0, 128, 0.3); border-radius: 20px; padding: 2rem;">
+                    <h3 style="color: #ff0080; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-feather="cpu" style="width: 20px; height: 20px;"></i>
+                        AI Development Partner
+                    </h3>
+                    <div style="color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+                        <p style="margin-bottom: 1rem;"><strong>Cascade AI Assistant</strong></p>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="code" style="width: 16px; height: 16px; color: #ff0080;"></i>
+                                <span>Full-stack development: Flask backend, HTML/CSS/JS frontend</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="database" style="width: 16px; height: 16px; color: #ff0080;"></i>
+                                <span>Database architecture and Supabase PostgreSQL integration</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="palette" style="width: 16px; height: 16px; color: #ff0080;"></i>
+                                <span>Modern UI/UX design with cyber-neon theme and animations</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="clock" style="width: 16px; height: 16px; color: #ff0080;"></i>
+                                <span>Persistent timer system with cross-tab synchronization</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="shield" style="width: 16px; height: 16px; color: #ff0080;"></i>
+                                <span>Firebase authentication and security implementation</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="smartphone" style="width: 16px; height: 16px; color: #ff0080;"></i>
+                                <span>Responsive design and progressive web app features</span>
+                            </li>
+                            <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-feather="zap" style="width: 16px; height: 16px; color: #ff0080;"></i>
+                                <span>Performance optimization and deployment automation</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Collaboration Message -->
+            <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(255, 0, 128, 0.1)); border-radius: 20px; border: 1px solid rgba(0, 255, 136, 0.3);">
+                <h3 style="color: #00ff88; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <i data-feather="heart" style="width: 20px; height: 20px; color: #ff0080;"></i>
+                    Human-AI Collaboration
+                    <i data-feather="zap" style="width: 20px; height: 20px; color: #00ff88;"></i>
+                </h3>
+                <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.1rem; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+                    ExamX represents the perfect synergy between human creativity and AI capability. 
+                    The student's vision and educational insights combined with AI's technical implementation 
+                    created a tool that truly understands and serves the student community. This collaboration 
+                    demonstrates how AI can amplify human ideas to create meaningful educational impact.
+                </p>
+                <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #00ff88;">
+                        <i data-feather="users" style="width: 18px; height: 18px;"></i>
+                        <span style="font-weight: 600;">Student-Centric Design</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #ff0080;">
+                        <i data-feather="cpu" style="width: 18px; height: 18px;"></i>
+                        <span style="font-weight: 600;">AI-Powered Development</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #00d4ff;">
+                        <i data-feather="github" style="width: 18px; height: 18px;"></i>
+                        <span style="font-weight: 600;">Open Source Future</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Made with <i data-feather="heart" style="width: 16px; height: 16px; color: #ff0080;"></i> for students by students | ExamX {{ app_info.version }} | 
+        <a href="{{ app_info.github_url }}" target="_blank" style="color: #00ff88;"><i data-feather="github" style="width: 16px; height: 16px;"></i> GitHub</a></p>
+    </div>
+
+    <!-- Initialize Feather Icons -->
+    <script>
+        // Initialize Feather icons
+        feather.replace();
+    </script>
+</body>
+</html>

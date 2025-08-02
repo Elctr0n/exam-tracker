@@ -12,22 +12,12 @@ class DatabaseManager:
     
     def init_database(self):
         """Initialize database connection - PostgreSQL for production, SQLite for development"""
-        # Debug: Print all environment variables
-        print(f"🔍 All env vars: {list(os.environ.keys())}")
-        
-        # Check for PostgreSQL connection (Railway provides DATABASE_URL)
+        # Check for PostgreSQL connection (Supabase provides DATABASE_URL)
         database_url = (
             os.environ.get('DATABASE_URL') or 
-            os.environ.get('POSTGRES_URL') or
-            os.environ.get('DATABASE_PRIVATE_URL') or
-            os.environ.get('POSTGRES_PRIVATE_URL')
+            os.environ.get('SUPABASE_DB_URL') or
+            os.environ.get('POSTGRES_URL')
         )
-        print(f"🔍 Found database_url: {database_url[:50] if database_url else 'None'}...")
-        
-        # Fallback: Use hardcoded Railway external URL if no env var found
-        if not database_url:
-            database_url = "postgresql://postgres:pHeoIiCbCtdGVKEuSSyOFnLHQRGXAFdB@gondola.proxy.rlwy.net:49565/railway"
-            print("🔧 Using hardcoded Railway external DATABASE_URL as fallback")
         
         if database_url:
             try:
@@ -35,44 +25,46 @@ class DatabaseManager:
                 url = urlparse(database_url)
                 self.db_type = 'postgresql'
                 
-                # Handle Railway's PostgreSQL connection
+                # Connect to Supabase PostgreSQL
                 self.connection = psycopg2.connect(
                     host=url.hostname,
                     port=url.port or 5432,
                     user=url.username,
                     password=url.password,
-                    database=url.path[1:] if url.path else 'railway',  # Remove leading slash
-                    sslmode='require'  # Railway requires SSL
+                    database=url.path[1:] if url.path else 'postgres',  # Remove leading slash
+                    sslmode='require'  # Supabase requires SSL
                 )
-                print("✅ Connected to PostgreSQL database")
+                print("✅ Connected to Supabase PostgreSQL database")
                 
             except Exception as e:
                 print(f"❌ PostgreSQL connection failed: {e}")
-                # In production (Railway), don't fall back to SQLite - raise the error
-                is_railway = any([
+                # Check if we're in production environment
+                is_production = any([
                     os.environ.get('RAILWAY_ENVIRONMENT'),
-                    os.environ.get('RAILWAY_PROJECT_ID'),
-                    os.environ.get('RAILWAY_SERVICE_ID'),
-                    os.environ.get('PORT')  # Railway always sets PORT
+                    os.environ.get('VERCEL'),
+                    os.environ.get('NETLIFY'),
+                    os.environ.get('HEROKU'),
+                    os.environ.get('PORT')  # Most platforms set PORT
                 ])
-                if is_railway:
-                    print("🚨 Running in Railway - SQLite fallback disabled")
+                if is_production:
+                    print("🚨 Running in production - PostgreSQL connection required")
                     raise Exception(f"PostgreSQL connection required in production: {e}")
                 else:
                     print("🔄 Falling back to SQLite for local development...")
                     self.init_sqlite()
         else:
-            # Only use SQLite for local development
-            is_railway = any([
+            # Check if we're in production environment
+            is_production = any([
                 os.environ.get('RAILWAY_ENVIRONMENT'),
-                os.environ.get('RAILWAY_PROJECT_ID'),
-                os.environ.get('RAILWAY_SERVICE_ID'),
-                os.environ.get('PORT')  # Railway always sets PORT
+                os.environ.get('VERCEL'),
+                os.environ.get('NETLIFY'),
+                os.environ.get('HEROKU'),
+                os.environ.get('PORT')  # Most platforms set PORT
             ])
-            if is_railway:
-                print(f"🚨 Railway detected but DATABASE_URL not found!")
-                print(f"Available env vars: {[k for k in os.environ.keys() if 'DATABASE' in k or 'POSTGRES' in k]}")
-                raise Exception("DATABASE_URL not found in Railway environment")
+            if is_production:
+                print(f"🚨 Production environment detected but DATABASE_URL not found!")
+                print(f"Available env vars: {[k for k in os.environ.keys() if 'DATABASE' in k or 'POSTGRES' in k or 'SUPABASE' in k]}")
+                raise Exception("DATABASE_URL not found in production environment")
             else:
                 print("🔧 Using SQLite for local development")
                 self.init_sqlite()
@@ -144,6 +136,72 @@ class DatabaseManager:
                     UNIQUE(user_id, exam, subject, topic)
                 )
             ''')
+            
+            # User settings and preferences table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_settings (
+                    id SERIAL PRIMARY KEY,
+                    user_id VARCHAR(255) UNIQUE NOT NULL,
+                    study_reminders BOOLEAN DEFAULT TRUE,
+                    dark_mode BOOLEAN DEFAULT FALSE,
+                    privacy_mode BOOLEAN DEFAULT FALSE,
+                    notification_preferences JSONB DEFAULT '{}',
+                    theme_preferences JSONB DEFAULT '{}',
+                    study_schedule JSONB DEFAULT '{}',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # User activity and analytics table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_activity (
+                    id SERIAL PRIMARY KEY,
+                    user_id VARCHAR(255) NOT NULL,
+                    activity_type VARCHAR(100) NOT NULL,
+                    activity_data JSONB DEFAULT '{}',
+                    exam VARCHAR(100),
+                    subject VARCHAR(100),
+                    topic VARCHAR(255),
+                    session_duration INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Study sessions tracking table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS study_sessions (
+                    id SERIAL PRIMARY KEY,
+                    user_id VARCHAR(255) NOT NULL,
+                    exam VARCHAR(100) NOT NULL,
+                    subject VARCHAR(100),
+                    topic VARCHAR(255),
+                    session_start TIMESTAMP NOT NULL,
+                    session_end TIMESTAMP,
+                    duration_minutes INTEGER DEFAULT 0,
+                    session_type VARCHAR(50) DEFAULT 'study',
+                    notes TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # User statistics and achievements table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_statistics (
+                    id SERIAL PRIMARY KEY,
+                    user_id VARCHAR(255) UNIQUE NOT NULL,
+                    total_study_time INTEGER DEFAULT 0,
+                    study_streak INTEGER DEFAULT 0,
+                    last_study_date DATE,
+                    total_topics_completed INTEGER DEFAULT 0,
+                    total_exams_started INTEGER DEFAULT 0,
+                    achievements JSONB DEFAULT '[]',
+                    weekly_goals JSONB DEFAULT '{}',
+                    monthly_stats JSONB DEFAULT '{}',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
         else:
             # SQLite syntax
             cursor.execute('''
@@ -177,12 +235,396 @@ class DatabaseManager:
                     UNIQUE(user_id, exam, subject, topic)
                 )
             ''')
-        
+            
+            # User settings and preferences table (SQLite)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_settings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT UNIQUE NOT NULL,
+                    study_reminders INTEGER DEFAULT 1,
+                    dark_mode INTEGER DEFAULT 0,
+                    privacy_mode INTEGER DEFAULT 0,
+                    notification_preferences TEXT DEFAULT '{}',
+                    theme_preferences TEXT DEFAULT '{}',
+                    study_schedule TEXT DEFAULT '{}',
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # User activity and analytics table (SQLite)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_activity (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT NOT NULL,
+                    activity_type TEXT NOT NULL,
+                    activity_data TEXT DEFAULT '{}',
+                    exam TEXT,
+                    subject TEXT,
+                    topic TEXT,
+                    session_duration INTEGER DEFAULT 0,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Study sessions tracking table (SQLite)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS study_sessions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT NOT NULL,
+                    exam TEXT NOT NULL,
+                    subject TEXT,
+                    topic TEXT,
+                    session_start TEXT NOT NULL,
+                    session_end TEXT,
+                    duration_minutes INTEGER DEFAULT 0,
+                    session_type TEXT DEFAULT 'study',
+                    notes TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # User statistics and achievements table (SQLite)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_statistics (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT UNIQUE NOT NULL,
+                    total_study_time INTEGER DEFAULT 0,
+                    study_streak INTEGER DEFAULT 0,
+                    last_study_date TEXT,
+                    total_topics_completed INTEGER DEFAULT 0,
+                    total_exams_started INTEGER DEFAULT 0,
+                    achievements TEXT DEFAULT '[]',
+                    weekly_goals TEXT DEFAULT '{}',
+                    monthly_stats TEXT DEFAULT '{}',
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')         
         conn.commit()
         if self.db_type == 'sqlite':
             conn.close()
         print("✅ Database tables created successfully")
+    print("📊 Enhanced schema: users, user_progress, user_settings, user_activity, study_sessions, user_statistics")
+
+    # User Settings Methods
+    def save_user_settings(self, user_id, settings):
+        """Save user settings and preferences"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    INSERT INTO user_settings (user_id, study_reminders, dark_mode, privacy_mode, 
+                                              notification_preferences, theme_preferences, study_schedule, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    ON CONFLICT (user_id) DO UPDATE SET
+                        study_reminders = EXCLUDED.study_reminders,
+                        dark_mode = EXCLUDED.dark_mode,
+                        privacy_mode = EXCLUDED.privacy_mode,
+                        notification_preferences = EXCLUDED.notification_preferences,
+                        theme_preferences = EXCLUDED.theme_preferences,
+                        study_schedule = EXCLUDED.study_schedule,
+                        updated_at = CURRENT_TIMESTAMP
+                ''', (
+                    user_id,
+                    settings.get('study_reminders', True),
+                    settings.get('dark_mode', False),
+                    settings.get('privacy_mode', False),
+                    json.dumps(settings.get('notification_preferences', {})),
+                    json.dumps(settings.get('theme_preferences', {})),
+                    json.dumps(settings.get('study_schedule', {}))
+                ))
+            else:
+                cursor.execute('''
+                    INSERT OR REPLACE INTO user_settings (user_id, study_reminders, dark_mode, privacy_mode,
+                                                         notification_preferences, theme_preferences, study_schedule)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    user_id,
+                    1 if settings.get('study_reminders', True) else 0,
+                    1 if settings.get('dark_mode', False) else 0,
+                    1 if settings.get('privacy_mode', False) else 0,
+                    json.dumps(settings.get('notification_preferences', {})),
+                    json.dumps(settings.get('theme_preferences', {})),
+                    json.dumps(settings.get('study_schedule', {}))
+                ))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error saving user settings: {e}")
+            return False
+        finally:
+            if self.db_type == 'sqlite':
+                conn.close()
     
+    def get_user_settings(self, user_id):
+        """Get user settings and preferences"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute('SELECT * FROM user_settings WHERE user_id = %s' if self.db_type == 'postgresql' else 'SELECT * FROM user_settings WHERE user_id = ?', (user_id,))
+            result = cursor.fetchone()
+            
+            if result:
+                columns = [desc[0] for desc in cursor.description]
+                settings = dict(zip(columns, result))
+                
+                # Parse JSON fields
+                for field in ['notification_preferences', 'theme_preferences', 'study_schedule']:
+                    if field in settings and settings[field]:
+                        try:
+                            settings[field] = json.loads(settings[field])
+                        except:
+                            settings[field] = {}
+                
+                # Convert boolean fields for SQLite
+                if self.db_type == 'sqlite':
+                    settings['study_reminders'] = bool(settings['study_reminders'])
+                    settings['dark_mode'] = bool(settings['dark_mode'])
+                    settings['privacy_mode'] = bool(settings['privacy_mode'])
+                
+                return settings
+            return None
+        except Exception as e:
+            print(f"Error getting user settings: {e}")
+            return None
+        finally:
+            if self.db_type == 'sqlite':
+                conn.close()
+    
+    def log_user_activity(self, user_id, activity_type, activity_data=None, exam=None, subject=None, topic=None, session_duration=0):
+        """Log user activity for analytics"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ''', (
+                    user_id,
+                    activity_type,
+                    json.dumps(activity_data or {}),
+                    exam,
+                    subject,
+                    topic,
+                    session_duration
+                ))
+            else:
+                cursor.execute('''
+                    INSERT INTO user_activity (user_id, activity_type, activity_data, exam, subject, topic, session_duration)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    user_id,
+                    activity_type,
+                    json.dumps(activity_data or {}),
+                    exam,
+                    subject,
+                    topic,
+                    session_duration
+                ))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error logging user activity: {e}")
+            return False
+        finally:
+            if self.db_type == 'sqlite':
+                conn.close()
+    
+    def start_study_session(self, user_id, exam, subject=None, topic=None, session_type='study'):
+        """Start a new study session"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    INSERT INTO study_sessions (user_id, exam, subject, topic, session_start, session_type)
+                    VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, %s)
+                    RETURNING id
+                ''', (user_id, exam, subject, topic, session_type))
+                session_id = cursor.fetchone()[0]
+            else:
+                cursor.execute('''
+                    INSERT INTO study_sessions (user_id, exam, subject, topic, session_start, session_type)
+                    VALUES (?, ?, ?, ?, datetime('now'), ?)
+                ''', (user_id, exam, subject, topic, session_type))
+                session_id = cursor.lastrowid
+            
+            conn.commit()
+            return session_id
+        except Exception as e:
+            print(f"Error starting study session: {e}")
+            return None
+        finally:
+            if self.db_type == 'sqlite':
+                conn.close()
+    
+    def end_study_session(self, session_id, notes=None):
+        """End a study session and calculate duration"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    UPDATE study_sessions 
+                    SET session_end = CURRENT_TIMESTAMP,
+                        duration_minutes = EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - session_start))/60,
+                        notes = %s
+                    WHERE id = %s
+                    RETURNING user_id, duration_minutes
+                ''', (notes, session_id))
+                result = cursor.fetchone()
+            else:
+                cursor.execute('''
+                    UPDATE study_sessions 
+                    SET session_end = datetime('now'),
+                        duration_minutes = (julianday(datetime('now')) - julianday(session_start)) * 24 * 60,
+                        notes = ?
+                    WHERE id = ?
+                ''', (notes, session_id))
+                
+                cursor.execute('SELECT user_id, duration_minutes FROM study_sessions WHERE id = ?', (session_id,))
+                result = cursor.fetchone()
+            
+            conn.commit()
+            
+            if result:
+                user_id, duration = result
+                # Update user statistics
+                self.update_user_statistics(user_id, study_time_added=int(duration or 0))
+                return duration
+            return None
+        except Exception as e:
+            print(f"Error ending study session: {e}")
+            return None
+        finally:
+            if self.db_type == 'sqlite':
+                conn.close()
+    
+    def update_user_statistics(self, user_id, study_time_added=0, topics_completed=0):
+        """Update user statistics"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Get current statistics
+            cursor.execute('SELECT * FROM user_statistics WHERE user_id = %s' if self.db_type == 'postgresql' else 'SELECT * FROM user_statistics WHERE user_id = ?', (user_id,))
+            current_stats = cursor.fetchone()
+            
+            if current_stats:
+                # Update existing statistics
+                new_total_time = (current_stats[2] or 0) + study_time_added
+                new_topics_completed = (current_stats[5] or 0) + topics_completed
+                
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        UPDATE user_statistics 
+                        SET total_study_time = %s,
+                            total_topics_completed = %s,
+                            last_study_date = CURRENT_DATE,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE user_id = %s
+                    ''', (new_total_time, new_topics_completed, user_id))
+                else:
+                    cursor.execute('''
+                        UPDATE user_statistics 
+                        SET total_study_time = ?,
+                            total_topics_completed = ?,
+                            last_study_date = date('now')
+                        WHERE user_id = ?
+                    ''', (new_total_time, new_topics_completed, user_id))
+            else:
+                # Create new statistics record
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        INSERT INTO user_statistics (user_id, total_study_time, total_topics_completed, last_study_date)
+                        VALUES (%s, %s, %s, CURRENT_DATE)
+                    ''', (user_id, study_time_added, topics_completed))
+                else:
+                    cursor.execute('''
+                        INSERT INTO user_statistics (user_id, total_study_time, total_topics_completed, last_study_date)
+                        VALUES (?, ?, ?, date('now'))
+                    ''', (user_id, study_time_added, topics_completed))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error updating user statistics: {e}")
+            return False
+        finally:
+            if self.db_type == 'sqlite':
+                conn.close()
+    
+    def get_user_statistics(self, user_id):
+        """Get comprehensive user statistics"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Get basic statistics
+            cursor.execute('SELECT * FROM user_statistics WHERE user_id = %s' if self.db_type == 'postgresql' else 'SELECT * FROM user_statistics WHERE user_id = ?', (user_id,))
+            stats_result = cursor.fetchone()
+            
+            # Get progress statistics
+            cursor.execute('''
+                SELECT 
+                    COUNT(DISTINCT exam) as total_exams,
+                    COUNT(*) as total_topics,
+                    SUM(CASE WHEN theory = %s OR practice = %s OR revision = %s THEN 1 ELSE 0 END) as completed_topics
+                FROM user_progress 
+                WHERE user_id = %s
+            ''' if self.db_type == 'postgresql' else '''
+                SELECT 
+                    COUNT(DISTINCT exam) as total_exams,
+                    COUNT(*) as total_topics,
+                    SUM(CASE WHEN theory = 1 OR practice = 1 OR revision = 1 THEN 1 ELSE 0 END) as completed_topics
+                FROM user_progress 
+                WHERE user_id = ?
+            ''', (True, True, True, user_id) if self.db_type == 'postgresql' else (user_id,))
+            progress_result = cursor.fetchone()
+            
+            # Get recent activity
+            cursor.execute('''
+                SELECT COUNT(*) as recent_sessions
+                FROM study_sessions 
+                WHERE user_id = %s AND session_start >= %s
+            ''' if self.db_type == 'postgresql' else '''
+                SELECT COUNT(*) as recent_sessions
+                FROM study_sessions 
+                WHERE user_id = ? AND session_start >= date('now', '-7 days')
+            ''', (user_id, 'CURRENT_DATE - INTERVAL \'7 days\'') if self.db_type == 'postgresql' else (user_id,))
+            activity_result = cursor.fetchone()
+            
+            # Combine all statistics
+            stats = {
+                'total_study_time': stats_result[2] if stats_result else 0,
+                'study_streak': stats_result[3] if stats_result else 0,
+                'last_study_date': stats_result[4] if stats_result else None,
+                'total_topics_completed': stats_result[5] if stats_result else 0,
+                'total_exams_started': stats_result[6] if stats_result else 0,
+                'total_exams': progress_result[0] if progress_result else 0,
+                'total_topics': progress_result[1] if progress_result else 0,
+                'completed_topics': progress_result[2] if progress_result else 0,
+                'recent_sessions': activity_result[0] if activity_result else 0
+            }
+            
+            return stats
+        except Exception as e:
+            print(f"Error getting user statistics: {e}")
+            return {}
+        finally:
+            if self.db_type == 'sqlite':
+                conn.close()
+
     def save_user_data(self, user_id, user_data):
         """Save or update user data"""
         conn = self.get_connection()
@@ -339,3 +781,6 @@ class DatabaseManager:
 
 # Global database instance
 db = DatabaseManager()
+
+# Import json for database methods
+import json

@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrepDyno - Future of Learning</title>
+    <title>ExamX - Smart Exam Tracker</title>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Persistent Timer System -->
+    <script src="/static/js/persistent-timer.js"></script>
     <style>
         * {
             margin: 0;
@@ -84,12 +91,14 @@
             background: rgba(12, 12, 12, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-            padding: 1rem 2rem;
+            padding: 0.8rem 2rem;
             z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            height: 70px;
+            overflow: hidden;
         }
 
         .nav-logo {
@@ -110,8 +119,62 @@
 
         .nav-menu {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             align-items: center;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* GitHub Link in Navigation */
+        .github-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .github-nav-link:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+            color: #00ff88;
+            transform: translateY(-2px);
         }
 
         .auth-section {
@@ -182,18 +245,20 @@
         }
 
         .nav-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 25px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .nav-btn::before {
@@ -243,23 +308,24 @@
             animation: pulse 2s infinite;
         }
 
-        /* Modern Study Timer */
-        .study-timer-modern {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            border-radius: 20px;
-            padding: 1rem 1.5rem;
+        /* Compact Study Timer */
+        .study-timer-compact {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 0.8rem;
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 255, 136, 0.2);
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
-        .study-timer-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 255, 136, 0.3);
+        .study-timer-compact:hover {
+            border-color: rgba(0, 255, 136, 0.5);
+            background: rgba(0, 255, 136, 0.15);
+            transform: translateY(-1px);
         }
 
         .timer-display {
@@ -269,44 +335,37 @@
         }
 
         .timer-icon {
-            font-size: 1.5rem;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
+            color: #00ff88;
+            width: 16px;
+            height: 16px;
         }
 
         .timer-time {
             font-family: 'Courier New', monospace;
-            font-size: 1.4rem;
-            font-weight: 700;
+            font-size: 0.9rem;
+            font-weight: 600;
             color: #00ff88;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-            min-width: 100px;
+            min-width: 70px;
         }
 
         .timer-controls {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.3rem;
         }
 
         .timer-btn {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #00ff88;
-            width: 40px;
-            height: 40px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            position: relative;
-            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .timer-btn::before {
@@ -1353,53 +1412,78 @@
     
     <!-- Navigation Header -->
     <nav class="nav-header">
-        <div class="nav-logo">PrepDyno</div>
+        <a href="/" class="nav-logo">ExamX</a>
         <div class="nav-center">
-            <!-- Modern Study Timer -->
-            <div class="study-timer-modern" id="studyTimer">
-                <div class="timer-display">
-                    <div class="timer-icon">📚</div>
-                    <div class="timer-time" id="timerDisplay">00:00:00</div>
-                </div>
-                <div class="timer-controls">
-                    <button class="timer-btn play" id="playBtn" onclick="startTimer()">▶</button>
-                    <button class="timer-btn pause" id="pauseBtn" onclick="pauseTimer()" style="display: none;">⏸</button>
-                    <button class="timer-btn stop" onclick="resetTimer()">⏹</button>
-                </div>
-                <div class="timer-stats">
-                    <span class="stat-item">Today: <span id="todayTime">0h 0m</span></span>
-                </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link active">Home</a>
+                <a href="/about" class="nav-link">About</a>
+                <a href="/dashboard" class="nav-link">Dashboard</a>
             </div>
         </div>
-        <div class="nav-menu">
-            <!-- Dynamic Auth Section -->
-            <div id="authSection" class="auth-section">
-                <!-- Shown when user is NOT logged in -->
-                <div id="loggedOutSection" class="auth-buttons">
-                    <a href="#" class="nav-btn" onclick="handleLogin()">🔐 Login</a>
-                </div>
-                
-                <!-- Shown when user IS logged in -->
-                <div id="loggedInSection" class="auth-buttons" style="display: none;">
-                    <div class="user-info-nav" onclick="handleProfile()">
-                        <img id="userAvatar" class="user-avatar-nav" src="" alt="User" style="display: none;">
-                        <div id="userInitials" class="user-initials-nav"></div>
-                        <span id="userName" class="user-name-nav">User</span>
+        <div class="nav-right">
+            <!-- Compact Study Timer -->
+            <div class="study-timer-compact" id="studyTimer">
+                <div class="timer-section">
+                    <div class="timer-display" id="timerDisplay">00:00:00</div>
+                    <div class="timer-controls">
+                        <button class="timer-btn" id="playBtn" style="display: flex;">
+                            <i data-feather="play" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="timer-btn" id="pauseBtn" style="display: none;">
+                            <i data-feather="pause" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="timer-btn stop">
+                            <i data-feather="square" style="width: 14px; height: 14px;"></i>
+                        </button>
                     </div>
-                    <a href="#" class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</a>
+                </div>
+            
+            <!-- GitHub Link -->
+            <a href="https://github.com/Elctr0n/exam-tracker" target="_blank" class="github-nav-link">
+                <i data-feather="github" style="width: 18px; height: 18px;"></i>
+                GitHub
+            </a>
+            
+            <!-- Auth Section -->
+            <div id="authSection" class="auth-section">
+                <div id="loggedOutSection" class="auth-buttons">
+                    <a href="/dashboard" class="nav-btn">
+                <i data-feather="bar-chart-2" style="width: 16px; height: 16px;"></i>
+                Dashboard
+            </a>
+            <a href="/stats" class="nav-btn">
+                <i data-feather="trending-up" style="width: 16px; height: 16px;"></i>
+                Stats
+            </a>
+                    <a href="/login" class="nav-btn">
+                        <i data-feather="log-in" style="width: 16px; height: 16px;"></i>
+                        Login
+                    </a>
+                </div>
+                <div id="loggedInSection" class="auth-buttons" style="display: none;">
+                    <a href="/dashboard" class="nav-btn">
+                        <i data-feather="bar-chart-2" style="width: 16px; height: 16px;"></i>
+                        Dashboard
+                    </a>
+                    <a href="/stats" class="nav-btn">
+                        <i data-feather="trending-up" style="width: 16px; height: 16px;"></i>
+                        Stats
+                    </a>
+                    <a href="/profile" class="nav-btn">
+                        <i data-feather="user" style="width: 16px; height: 16px;"></i>
+                        Profile
+                    </a>
+                    <a href="#" class="nav-btn logout-btn" onclick="handleLogout()">
+                        <i data-feather="log-out" style="width: 16px; height: 16px;"></i>
+                        Logout
+                    </a>
                 </div>
             </div>
-            
-            <a href="/dashboard" class="nav-btn" id="dashboardBtn" style="display: none;">🎯 Dashboard</a>
-            <a href="/stats" class="nav-btn" onclick="handleStats()">📊 Stats</a>
-            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Leaderboard')">🏆 Leaderboard</a>
-            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Test')">📝 Test</a>
-            <a href="#" class="nav-btn primary upcoming" onclick="showUpcoming('Practice')">💪 Practice</a>
         </div>
     </nav>
     
     <div class="container">
-        <h1 class="logo">PrepDyno</h1>
+        <div class="logo">ExamX</div>
         <p class="tagline">The Future of Competitive Exam Preparation</p>
         
         <!-- Primary CTA Button - More Visible -->
@@ -2369,6 +2453,9 @@
                 saveStudyTime();
             }
         });
+        
+        // Initialize Feather icons
+        feather.replace();
     </script>
 </body>
 </html>
