@@ -1,88 +1,94 @@
-# Exam Syllabus Completion & Preparation Tracker
+# ExamX - Advanced Exam Tracker
 
-A comprehensive web application to track syllabus completion and preparation progress for major engineering entrance exams including JEE Main, JEE Advanced, IAT (Indian Army Technical), and UGEE (Undergraduate Engineering Entrance Exam).
+🎯 **A comprehensive exam preparation tracker built for students, by students.**
 
-## Features
+ExamX is a modern, feature-rich web application designed to help students track their exam preparation progress across multiple subjects and topics. Built with Flask, PostgreSQL, and a beautiful cyber-neon UI.
 
-- **Multi-Exam Support**: Track progress for JEE Main, JEE Advanced, IAT, and UGEE
-- **Subject-wise Organization**: Organized by subjects (Physics, Chemistry, Mathematics, General Knowledge)
-- **Topic-level Tracking**: Mark individual topics as completed with timestamps
-- **Progress Visualization**: Real-time progress bars and completion percentages
-- **Modern UI**: Clean, responsive, and user-friendly interface
-- **Data Persistence**: Progress is saved automatically and persists between sessions
-- **Statistics Dashboard**: Overview of completion status across all exams
+## ✨ Features
 
-## Technology Stack
+### 📚 **Core Functionality**
+- **Multi-Exam Support**: Track progress for JEE, NEET, GATE, CAT, and more
+- **Three-Stage Learning**: Theory → Practice → Revision workflow
+- **Real-time Progress Tracking**: Visual progress indicators and statistics
+- **Persistent Study Timer**: Cross-tab synchronized timer with play/pause/stop controls
 
-- **Backend**: Flask (Python)
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Styling**: Modern CSS with gradients and animations
-- **Icons**: Font Awesome
-- **Data Storage**: JSON file (easily upgradeable to database)
+### 🎨 **User Experience**
+- **Cyber-Neon Theme**: Modern, professional dark theme with neon accents
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Feather Icons**: Consistent, professional iconography throughout
+- **Smooth Animations**: Enhanced user interactions and transitions
 
-## Installation & Setup
+### 🔧 **Advanced Features**
+- **Firebase Authentication**: Secure user login and session management
+- **Supabase Integration**: Robust PostgreSQL database with real-time sync
+- **Account Settings**: Study reminders, dark mode, privacy controls
+- **Activity Tracking**: Comprehensive analytics and progress insights
+- **Cross-Device Sync**: Settings and progress synchronized across devices
 
-1. **Clone or download the project files**
+### 📊 **Analytics & Insights**
+- **Detailed Statistics**: Study time, completion rates, streak tracking
+- **Progress Visualization**: Charts and graphs for performance analysis
+- **Study Session Management**: Track focused study periods
+- **Achievement System**: Milestones and progress celebrations
 
-2. **Install Python dependencies**:
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8+
+- PostgreSQL (or SQLite for local development)
+- Firebase project (for authentication)
+- Supabase account (for production database)
+
+### Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Elctr0n/exam-tracker.git
+   cd exam-tracker
+   ```
+
+2. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Run the application**:
+3. **Set up environment variables**
+   ```bash
+   # Create .env file with your configuration
+   DATABASE_URL=your_database_url_here
+   FLASK_ENV=development
+   ```
+
+4. **Run the application**
    ```bash
    python app.py
    ```
 
-4. **Access the application**:
-   Open your web browser and navigate to `http://localhost:5000`
+5. **Access the app**
+   Open `http://localhost:5000` in your browser
 
-## Usage
+## 🌐 Deployment
 
-1. **Select an Exam**: Click on the exam tabs (JEE Main, JEE Advanced, IAT, UGEE)
-2. **Track Progress**: Click on topic checkboxes to mark them as completed
-3. **View Statistics**: Monitor your progress through the stats cards and progress bars
-4. **Subject-wise Progress**: Each subject shows individual completion percentages
+### Deploy to Render
 
-## Exam Syllabi Included
+ExamX is configured for easy deployment to Render:
 
-### JEE Main
-- **Physics**: 14 major topics including Mechanics, Thermodynamics, Electromagnetism, Optics, Modern Physics
-- **Chemistry**: 20 topics covering Physical, Inorganic, and Organic Chemistry
-- **Mathematics**: 15 topics including Calculus, Algebra, Coordinate Geometry, Statistics
+1. **Fork this repository** to your GitHub account
 
-### JEE Advanced
-- **Physics**: 6 comprehensive areas
-- **Chemistry**: 3 major branches
-- **Mathematics**: 6 core areas
+2. **Create a new Web Service** on [Render](https://render.com)
 
-### IAT (Indian Army Technical)
-- **Mathematics**: 6 fundamental topics
-- **Physics**: 6 core areas
-- **Chemistry**: 3 main branches
-- **General Knowledge**: 6 important areas
+3. **Connect your GitHub repository**
 
-### UGEE
-- **Physics**: 10 comprehensive topics
-- **Chemistry**: 25 detailed topics
-- **Mathematics**: 16 core areas
+4. **Configure the service**:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT app:app`
 
-## File Structure
+5. **Set environment variables**:
+   - `DATABASE_URL`: Your Supabase PostgreSQL connection string
+   - `FLASK_ENV`: `production`
+   - `RENDER_ENVIRONMENT`: `production`
 
-```
-exam-tracker/
-├── app.py                 # Main Flask application
-├── requirements.txt       # Python dependencies
-├── README.md             # Project documentation
-├── user_progress.json    # User progress data (auto-generated)
-├── templates/
-│   └── index.html        # Main HTML template
-└── static/
-    ├── css/
-    │   └── style.css     # Styling and responsive design
-    └── js/
-        └── app.js        # Frontend JavaScript logic
-```
+6. **Deploy** and access your live app!
 
 ## API Endpoints
 
