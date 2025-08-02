@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats - PrepDyno</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12, 12, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 1rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-info-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-info-nav:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .user-avatar-nav {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-initials-nav {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #0c0c0c;
+        }
+
+        .user-name-nav {
+            color: #00ff88;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 107, 107, 0.1) !important;
+            border-color: rgba(255, 107, 107, 0.3) !important;
+            color: #ff6b6b !important;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 107, 107, 0.2) !important;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3) !important;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+        }
+
+        .nav-btn.active {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: rgba(0, 255, 136, 0.5);
+            color: #00ff88;
+        }
+
+        .coming-soon-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 0.3rem;
+            font-weight: 700;
+        }
+
+        /* Main Content */
+        .container {
+            padding: 8rem 2rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+
+        .stat-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.5rem;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #00ff88;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .progress-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .progress-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 255, 136, 0.15);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-exam {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .progress-percentage {
+            color: #00ff88;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-details {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Timer Stats */
+        .timer-stats {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .timer-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .timer-icon {
+            font-size: 2rem;
+        }
+
+        .timer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .timer-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timer-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-menu {
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .container {
+                padding: 12rem 1rem 2rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+    
+    <!-- Navigation Header -->
+    <nav class="nav-header">
+        <div class="nav-logo">PrepDyno</div>
+        <div class="nav-center">
+        </div>
+        <div class="nav-menu">
+            <!-- Dynamic Auth Section -->
+            <div id="authSection" class="auth-section">
+                <!-- Shown when user is NOT logged in -->
+                <div id="loggedOutSection" class="auth-buttons">
+                    <a href="#" class="nav-btn" onclick="handleLogin()">🔐 Login</a>
+                </div>
+                
+                <!-- Shown when user IS logged in -->
+                <div id="loggedInSection" class="auth-buttons" style="display: none;">
+                    <div class="user-info-nav" onclick="handleProfile()">
+                        <img id="userAvatar" class="user-avatar-nav" src="" alt="User" style="display: none;">
+                        <div id="userInitials" class="user-initials-nav"></div>
+                        <span id="userName" class="user-name-nav">User</span>
+                    </div>
+                    <a href="#" class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</a>
+                </div>
+            </div>
+            
+            <a href="/" class="nav-btn">🏠 Home</a>
+            <a href="/stats" class="nav-btn active">📊 Stats</a>
+            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Leaderboard')">🏆 Leaderboard</a>
+            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Test')">📝 Test</a>
+            <a href="#" class="nav-btn primary upcoming" onclick="showUpcoming('Practice')">💪 Practice</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">📊 Your Stats</h1>
+            <p class="page-subtitle">Track your progress, study time, and achievements across all exams</p>
+        </div>
+        
+        <!-- Main Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-icon">📚</span>
+                <div class="stat-value" id="totalExams">0</div>
+                <div class="stat-label">Exams Tracked</div>
+                <div class="stat-description">Total number of exams you're preparing for</div>
+            </div>
+            
+            <div class="stat-card">
+                <span class="stat-icon">✅</span>
+                <div class="stat-value" id="completedTopics">0</div>
+                <div class="stat-label">Topics Completed</div>
+                <div class="stat-description">Across all subjects and exams</div>
+            </div>
+            
+            <div class="stat-card">
+                <span class="stat-icon">🔥</span>
+                <div class="stat-value" id="studyStreak">0</div>
+                <div class="stat-label">Study Streak</div>
+                <div class="stat-description">Consecutive days of studying</div>
+            </div>
+            
+            <div class="stat-card">
+                <span class="stat-icon">⏱️</span>
+                <div class="stat-value" id="totalStudyHours">0h</div>
+                <div class="stat-label">Total Study Time</div>
+                <div class="stat-description">All-time study hours tracked</div>
+            </div>
+        </div>
+        
+        <!-- Timer Statistics -->
+        <div class="timer-stats">
+            <div class="timer-header">
+                <span class="timer-icon">📚</span>
+                <h2 class="timer-title">Study Time Analytics</h2>
+            </div>
+            <div class="timer-grid">
+                <div class="timer-item">
+                    <div class="timer-value" id="todayStudyTime">0h 0m</div>
+                    <div class="timer-label">Today</div>
+                </div>
+                <div class="timer-item">
+                    <div class="timer-value" id="yesterdayStudyTime">0h 0m</div>
+                    <div class="timer-label">Yesterday</div>
+                </div>
+                <div class="timer-item">
+                    <div class="timer-value" id="weekStudyTime">0h 0m</div>
+                    <div class="timer-label">This Week</div>
+                </div>
+                <div class="timer-item">
+                    <div class="timer-value" id="averageDaily">0h 0m</div>
+                    <div class="timer-label">Daily Average</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Exam Progress -->
+        <div class="progress-section">
+            <h2 class="section-title">Exam Progress</h2>
+            <div class="progress-grid" id="examProgressGrid">
+                <!-- Progress cards will be dynamically generated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check function
+        function checkAuthentication() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (!userSession || userSession !== 'true' || !sessionExpiry || currentTime >= parseInt(sessionExpiry)) {
+                // User is not logged in or session expired
+                alert('Please login first to access your stats!');
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        // Check and update navigation based on login status
+        function updateNavigationUI() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            const loggedOutSection = document.getElementById('loggedOutSection');
+            const loggedInSection = document.getElementById('loggedInSection');
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is logged in
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                
+                // Hide logged out section, show logged in section
+                loggedOutSection.style.display = 'none';
+                loggedInSection.style.display = 'flex';
+                
+                // Update user info
+                const userName = document.getElementById('userName');
+                const userInitials = document.getElementById('userInitials');
+                const userAvatar = document.getElementById('userAvatar');
+                
+                const displayName = userData.displayName || userData.email?.split('@')[0] || 'User';
+                userName.textContent = displayName;
+                
+                // Set user avatar or initials
+                if (userData.photoURL) {
+                    userAvatar.src = userData.photoURL;
+                    userAvatar.style.display = 'block';
+                    userInitials.style.display = 'none';
+                } else {
+                    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                    userInitials.textContent = initials;
+                    userInitials.style.display = 'flex';
+                    userAvatar.style.display = 'none';
+                }
+            } else {
+                // User is not logged in or session expired
+                loggedOutSection.style.display = 'flex';
+                loggedInSection.style.display = 'none';
+                
+                // Clear expired session
+                if (userSession === 'true' && sessionExpiry && currentTime >= parseInt(sessionExpiry)) {
+                    localStorage.removeItem('userSession');
+                    localStorage.removeItem('sessionExpiry');
+                    localStorage.removeItem('userData');
+                }
+            }
+        }
+
+        // Navigation functions
+        function handleLogin() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                window.location.href = '/profile';
+            } else {
+                window.location.href = '/login';
+            }
+        }
+
+        function handleProfile() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                window.location.href = '/profile';
+            } else {
+                alert('Please login first to access your profile.');
+                window.location.href = '/login';
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('userSession');
+                localStorage.removeItem('sessionExpiry');
+                localStorage.removeItem('userData');
+                updateNavigationUI();
+                alert('You have been logged out successfully!');
+            }
+        }
+
+        function showUpcoming(feature) {
+            const messages = {
+                'Leaderboard': 'Compete with other students! Leaderboard feature coming soon.',
+                'Test': 'Take practice tests and mock exams! Test feature coming soon.',
+                'Practice': 'Practice with thousands of questions! Practice feature coming soon.'
+            };
+            alert(messages[feature] || `${feature} feature is coming soon! Stay tuned for updates.`);
+        }
+
+        // Timer utility functions
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+
+        // Load and display stats
+        function loadStats() {
+            // Get study time data
+            const studyData = JSON.parse(localStorage.getItem('studyTimeData') || '{}');
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            
+            // Calculate study times
+            const todayTime = studyData[today] || 0;
+            const yesterdayTime = studyData[yesterday] || 0;
+            
+            // Calculate week total
+            let weekTotal = 0;
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(Date.now() - (i * 86400000)).toDateString();
+                weekTotal += studyData[date] || 0;
+            }
+            
+            // Calculate total study time
+            let totalTime = 0;
+            Object.values(studyData).forEach(time => totalTime += time);
+            
+            // Calculate average daily (last 30 days)
+            let last30Days = 0;
+            let daysWithData = 0;
+            for (let i = 0; i < 30; i++) {
+                const date = new Date(Date.now() - (i * 86400000)).toDateString();
+                if (studyData[date]) {
+                    last30Days += studyData[date];
+                    daysWithData++;
+                }
+            }
+            const averageDaily = daysWithData > 0 ? Math.floor(last30Days / daysWithData) : 0;
+            
+            // Update timer stats
+            document.getElementById('todayStudyTime').textContent = formatTime(todayTime);
+            document.getElementById('yesterdayStudyTime').textContent = formatTime(yesterdayTime);
+            document.getElementById('weekStudyTime').textContent = formatTime(weekTotal);
+            document.getElementById('averageDaily').textContent = formatTime(averageDaily);
+            document.getElementById('totalStudyHours').textContent = formatTime(totalTime);
+            
+            // Calculate study streak
+            let streak = 0;
+            let currentDate = new Date();
+            while (true) {
+                const dateStr = currentDate.toDateString();
+                if (studyData[dateStr] && studyData[dateStr] > 0) {
+                    streak++;
+                    currentDate.setDate(currentDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            document.getElementById('studyStreak').textContent = streak;
+            
+            // Mock data for other stats (in real app, fetch from backend)
+            document.getElementById('totalExams').textContent = '4';
+            document.getElementById('completedTopics').textContent = '127';
+            
+            // Load exam progress
+            loadExamProgress();
+        }
+
+        function loadExamProgress() {
+            const exams = [
+                { name: 'JEE Advanced', progress: 65, completed: 45, total: 72 },
+                { name: 'NEET', progress: 42, completed: 41, total: 99 },
+                { name: 'IAT', progress: 78, completed: 57, total: 73 },
+                { name: 'UGEE', progress: 34, completed: 17, total: 50 }
+            ];
+            
+            const progressGrid = document.getElementById('examProgressGrid');
+            progressGrid.innerHTML = '';
+            
+            exams.forEach(exam => {
+                const progressCard = document.createElement('div');
+                progressCard.className = 'progress-card';
+                progressCard.innerHTML = `
+                    <div class="progress-header">
+                        <div class="progress-exam">${exam.name}</div>
+                        <div class="progress-percentage">${exam.progress}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${exam.progress}%"></div>
+                    </div>
+                    <div class="progress-details">${exam.completed}/${exam.total} topics completed</div>
+                `;
+                progressGrid.appendChild(progressCard);
+            });
+        }
+
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication before loading stats
+            if (!checkAuthentication()) {
+                return;
+            }
+            
+            createParticles();
+            updateNavigationUI();
+            loadStats();
+        });
+    </script>
+</body>
+</html>

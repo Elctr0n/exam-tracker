@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - PrepDyno</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12, 12, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 1rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.2);
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+            font-weight: 700;
+        }
+
+        .nav-btn.primary:hover {
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .nav-btn.upcoming::after {
+            content: 'Soon';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: white;
+            font-size: 0.6rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        /* Modern Study Timer */
+        .study-timer-modern {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .study-timer-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 255, 136, 0.3);
+        }
+
+        .timer-display {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .timer-icon {
+            font-size: 1.5rem;
+            animation: float-timer 3s ease-in-out infinite;
+        }
+
+        @keyframes float-timer {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .timer-time {
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            min-width: 100px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .timer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #00ff88;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .timer-btn:hover::before {
+            transform: scale(1);
+        }
+
+        .timer-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            border-color: #00ff88;
+        }
+
+        .timer-btn:active {
+            transform: scale(0.95);
+        }
+
+        .timer-btn.play {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+        }
+
+        .timer-btn.stop {
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: white;
+            border: none;
+        }
+
+        .timer-stats {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .stat-item {
+            font-weight: 600;
+        }
+
+        .stat-item span {
+            color: #00ff88;
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        /* Main content */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 8rem 2rem 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 0;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 2.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        .login-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            border-radius: 15px;
+            color: #0c0c0c;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: -1;
+        }
+
+        .divider span {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            padding: 0 1rem;
+        }
+
+        .social-btn {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            color: #00ff88;
+        }
+
+        .message.error {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            color: #ff6b6b;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password a {
+            color: #00d4ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .nav-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-center {
+                order: 3;
+            }
+            
+            .nav-menu {
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .study-timer-modern {
+                padding: 0.8rem 1rem;
+                gap: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .timer-time {
+                font-size: 1.2rem;
+            }
+            
+            .container {
+                padding: 12rem 1rem 2rem;
+            }
+            
+            .login-card {
+                padding: 2rem;
+            }
+            
+            .login-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+    
+    <!-- Navigation Header -->
+    <nav class="nav-header">
+        <div class="nav-logo">PrepDyno</div>
+        <div class="nav-center">
+            <!-- Modern Study Timer -->
+            <div class="study-timer-modern" id="studyTimer">
+                <div class="timer-display">
+                    <div class="timer-icon">📚</div>
+                    <div class="timer-time" id="timerDisplay">00:00:00</div>
+                </div>
+                <div class="timer-controls">
+                    <button class="timer-btn play" id="playBtn" onclick="startTimer()">▶</button>
+                    <button class="timer-btn pause" id="pauseBtn" onclick="pauseTimer()" style="display: none;">⏸</button>
+                    <button class="timer-btn stop" onclick="resetTimer()">⏹</button>
+                </div>
+                <div class="timer-stats">
+                    <span class="stat-item">Today: <span id="todayTime">0h 0m</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <a href="/" class="nav-btn">🏠 Home</a>
+            <a href="#" class="nav-btn primary">🔐 Login</a>
+            <a href="/stats" class="nav-btn" onclick="handleStats()">📊 Stats</a>
+            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Leaderboard')">🏆 Leaderboard</a>
+            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Test')">📝 Test</a>
+            <a href="#" class="nav-btn primary upcoming" onclick="showUpcoming('Practice')">💪 Practice</a>
+        </div>
+    </nav>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+                <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+            
+            <div class="message" id="message"></div>
+            
+            <!-- Login Tab -->
+            <div id="loginTab" class="tab-content active">
+                <div class="login-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to continue your learning journey</p>
+                </div>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="loginEmail" class="form-label">Email</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword" class="form-label">Password</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="login-btn">Sign In</button>
+                </form>
+                
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+                
+                <button class="social-btn" onclick="signInWithGoogle()">
+                    🔍 Sign in with Google
+                </button>
+                
+                <div class="forgot-password">
+                    <a href="#" onclick="resetPassword()">Forgot your password?</a>
+                </div>
+            </div>
+            
+            <!-- Sign Up Tab -->
+            <div id="signupTab" class="tab-content">
+                <div class="login-header">
+                    <h2>Create Account</h2>
+                    <p>Join thousands of students preparing for success</p>
+                </div>
+                
+                <form id="signupForm" class="login-form">
+                    <div class="form-group">
+                        <label for="signupName" class="form-label">Full Name</label>
+                        <input type="text" id="signupName" class="form-input" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupEmail" class="form-label">Email</label>
+                        <input type="email" id="signupEmail" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupPassword" class="form-label">Password</label>
+                        <input type="password" id="signupPassword" class="form-input" placeholder="Create a password (min 6 characters)" required minlength="6">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                    </div>
+                    
+                    <button type="submit" class="login-btn">Create Account</button>
+                </form>
+                
+                <div class="divider">
+                    <span>or sign up with</span>
+                </div>
+                
+                <button class="social-btn" onclick="signUpWithGoogle()">
+                    🔍 Sign up with Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDNTHrNhSenSAWzU8KIP8vm8gsFghAY8c",
+            authDomain: "tracker-4fd2b.firebaseapp.com",
+            projectId: "tracker-4fd2b",
+            storageBucket: "tracker-4fd2b.firebasestorage.app",
+            messagingSenderId: "1070985062588",
+            appId: "1:1070985062588:web:f5b7b5b5b5b5b5b5b5b5b5"
+        };
+
+        // Initialize Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Global timer variables
+        let timerInterval;
+        let startTime;
+        let elapsedTime = 0;
+        let isRunning = false;
+
+        // Timer functionality
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatTimeShort(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+
+        function updateTimerDisplay() {
+            const currentTime = isRunning ? elapsedTime + Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
+            document.getElementById('timerDisplay').textContent = formatTime(currentTime);
+        }
+
+        window.startTimer = function() {
+            if (!isRunning) {
+                startTime = Date.now();
+                isRunning = true;
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+                
+                document.getElementById('playBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'flex';
+            }
+        }
+
+        window.pauseTimer = function() {
+            if (isRunning) {
+                elapsedTime += Math.floor((Date.now() - startTime) / 1000);
+                isRunning = false;
+                clearInterval(timerInterval);
+                
+                document.getElementById('playBtn').style.display = 'flex';
+                document.getElementById('pauseBtn').style.display = 'none';
+                
+                saveStudyTime();
+            }
+        }
+
+        window.resetTimer = function() {
+            if (isRunning) {
+                elapsedTime += Math.floor((Date.now() - startTime) / 1000);
+                saveStudyTime();
+            }
+            
+            isRunning = false;
+            elapsedTime = 0;
+            clearInterval(timerInterval);
+            
+            document.getElementById('timerDisplay').textContent = '00:00:00';
+            document.getElementById('playBtn').style.display = 'flex';
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function saveStudyTime() {
+            if (elapsedTime > 0) {
+                const today = new Date().toDateString();
+                const studyData = JSON.parse(localStorage.getItem('studyData') || '{}');
+                
+                if (!studyData[today]) {
+                    studyData[today] = 0;
+                }
+                studyData[today] += elapsedTime;
+                
+                localStorage.setItem('studyData', JSON.stringify(studyData));
+                updateStudyStats();
+                elapsedTime = 0;
+            }
+        }
+
+        function updateStudyStats() {
+            const studyData = JSON.parse(localStorage.getItem('studyData') || '{}');
+            const today = new Date().toDateString();
+            const todayTime = studyData[today] || 0;
+            
+            document.getElementById('todayTime').textContent = formatTimeShort(todayTime);
+        }
+
+        // Navigation functions
+        window.handleProfile = function() {
+            const isLoggedIn = localStorage.getItem('userSession');
+            if (isLoggedIn) {
+                window.location.href = '/profile';
+            } else {
+                alert('Please login first to access your profile.');
+            }
+        }
+
+        window.showUpcoming = function(feature) {
+            const messages = {
+                'Leaderboard': 'Compete with other students! Leaderboard feature coming soon.',
+                'Test': 'Take practice tests and mock exams! Test feature coming soon.',
+                'Practice': 'Practice with thousands of questions! Practice feature coming soon.'
+            };
+            alert(messages[feature] || `${feature} feature is coming soon! Stay tuned for updates.`);
+        }
+
+        window.handleStats = function() {
+            // Check if user is logged in
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is logged in, go to stats
+                window.location.href = '/stats';
+            } else {
+                // User not logged in, redirect to login
+                alert('Please login first to access your stats.');
+                // Already on login page, no need to redirect
+            }
+        }
+
+        // Tab switching functionality
+        window.switchTab = function(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Authentication functions
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Store user session with longer expiry
+                const expiry = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days
+                localStorage.setItem('userSession', 'true');
+                localStorage.setItem('sessionExpiry', expiry.toString());
+                localStorage.setItem('userData', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    photoURL: user.photoURL
+                }));
+                
+                showMessage('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } catch (error) {
+                showMessage(getErrorMessage(error.code), 'error');
+            }
+        });
+
+        // Sign up form handler
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match!', 'error');
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Update user profile with display name
+                await updateProfile(user, {
+                    displayName: name
+                });
+                
+                // Store user session
+                const expiry = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days
+                localStorage.setItem('userSession', 'true');
+                localStorage.setItem('sessionExpiry', expiry.toString());
+                localStorage.setItem('userData', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: name,
+                    photoURL: user.photoURL
+                }));
+                
+                showMessage('Account created successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } catch (error) {
+                showMessage(getErrorMessage(error.code), 'error');
+            }
+        });
+
+        window.signInWithGoogle = async function() {
+            try {
+                // Configure Google provider with additional settings
+                googleProvider.setCustomParameters({
+                    prompt: 'select_account'
+                });
+                
+                // Add a small delay to ensure user interaction is registered
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                
+                const expiry = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days
+                localStorage.setItem('userSession', 'true');
+                localStorage.setItem('sessionExpiry', expiry.toString());
+                localStorage.setItem('userData', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    photoURL: user.photoURL
+                }));
+                
+                showMessage('Google sign-in successful! Welcome back! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } catch (error) {
+                console.error('Google Sign-in Error:', error);
+                if (error.code === 'auth/unauthorized-domain') {
+                    showMessage('🔧 Firebase Setup Required: Please add "127.0.0.1" and "localhost" to authorized domains in Firebase Console → Authentication → Settings → Authorized domains', 'error');
+                } else if (error.code === 'auth/popup-blocked') {
+                    showMessage('Popup was blocked by your browser. Please allow popups for this site and try again.', 'error');
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    showMessage('Sign-in was cancelled. Please try again.', 'error');
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    showMessage('Another sign-in popup is already open. Please complete or close it first.', 'error');
+                } else {
+                    showMessage(getErrorMessage(error.code), 'error');
+                }
+            }
+        }
+
+        window.signUpWithGoogle = async function() {
+            try {
+                // Configure Google provider with additional settings
+                googleProvider.setCustomParameters({
+                    prompt: 'select_account'
+                });
+                
+                // Add a small delay to ensure user interaction is registered
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                
+                const expiry = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days
+                localStorage.setItem('userSession', 'true');
+                localStorage.setItem('sessionExpiry', expiry.toString());
+                localStorage.setItem('userData', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    photoURL: user.photoURL
+                }));
+                
+                showMessage('Google sign-up successful! Welcome to PrepDyno! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } catch (error) {
+                console.error('Google Sign-up Error:', error);
+                if (error.code === 'auth/unauthorized-domain') {
+                    showMessage('🔧 Firebase Setup Required: Please add "127.0.0.1" and "localhost" to authorized domains in Firebase Console → Authentication → Settings → Authorized domains', 'error');
+                } else if (error.code === 'auth/popup-blocked') {
+                    showMessage('Popup was blocked by your browser. Please allow popups for this site and try again.', 'error');
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    showMessage('Sign-in was cancelled. Please try again.', 'error');
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    showMessage('Another sign-in popup is already open. Please complete or close it first.', 'error');
+                } else {
+                    showMessage(getErrorMessage(error.code), 'error');
+                }
+            }
+        }
+
+        window.resetPassword = async function() {
+            const email = prompt('Enter your email address:');
+            if (email) {
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    showMessage('Password reset email sent! Check your inbox.', 'success');
+                } catch (error) {
+                    showMessage(getErrorMessage(error.code), 'error');
+                }
+            }
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function getErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'auth/user-not-found':
+                    return 'No account found with this email address.';
+                case 'auth/wrong-password':
+                    return 'Incorrect password. Please try again.';
+                case 'auth/invalid-email':
+                    return 'Invalid email address format.';
+                case 'auth/user-disabled':
+                    return 'This account has been disabled.';
+                case 'auth/too-many-requests':
+                    return 'Too many failed attempts. Please try again later.';
+                case 'auth/popup-closed-by-user':
+                    return 'Sign-in popup was closed. Please try again.';
+                case 'auth/email-already-in-use':
+                    return 'An account with this email already exists. Please sign in instead.';
+                case 'auth/weak-password':
+                    return 'Password should be at least 6 characters long.';
+                case 'auth/invalid-credential':
+                    return 'Invalid email or password. Please check your credentials.';
+                default:
+                    return 'An error occurred. Please try again.';
+            }
+        }
+
+        // Check if user is already logged in
+        function checkExistingSession() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is already logged in and session is valid
+                showMessage('You are already logged in! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+                return true;
+            } else if (userSession === 'true' && sessionExpiry && currentTime >= parseInt(sessionExpiry)) {
+                // Session expired, clear it
+                localStorage.removeItem('userSession');
+                localStorage.removeItem('sessionExpiry');
+                localStorage.removeItem('userData');
+            }
+            return false;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            if (!checkExistingSession()) {
+                createParticles();
+                updateStudyStats();
+            }
+        });
+
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Auto-save timer on page unload
+        window.addEventListener('beforeunload', function() {
+            if (isRunning) {
+                elapsedTime += Math.floor((Date.now() - startTime) / 1000);
+                saveStudyTime();
+            }
+        });
+    </script>
+</body>
+</html>

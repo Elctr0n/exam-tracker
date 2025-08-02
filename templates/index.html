@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepDyno - Future of Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8rem 2rem 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff, #ff0080);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12, 12, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 1rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-info-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-info-nav:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .user-avatar-nav {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-initials-nav {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #0c0c0c;
+        }
+
+        .user-name-nav {
+            color: #00ff88;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 107, 107, 0.1) !important;
+            border-color: rgba(255, 107, 107, 0.3) !important;
+            color: #ff6b6b !important;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 107, 107, 0.2) !important;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3) !important;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.2);
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+            font-weight: 700;
+        }
+
+        .nav-btn.primary:hover {
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .nav-btn.upcoming::after {
+            content: 'Soon';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: white;
+            font-size: 0.6rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        /* Modern Study Timer */
+        .study-timer-modern {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .study-timer-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 255, 136, 0.3);
+        }
+
+        .timer-display {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .timer-icon {
+            font-size: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .timer-time {
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            min-width: 100px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .timer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #00ff88;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .timer-btn:hover::before {
+            transform: scale(1);
+        }
+
+        .timer-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            border-color: #00ff88;
+        }
+
+        .timer-btn:active {
+            transform: scale(0.95);
+        }
+
+        .timer-btn.play {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border: none;
+        }
+
+        .timer-btn.stop {
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: white;
+            border: none;
+        }
+
+        .timer-stats {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .stat-item {
+            font-weight: 600;
+        }
+
+        .stat-item span {
+            color: #00ff88;
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        /* Primary CTA Button - More Visible */
+        .primary-cta {
+            text-align: center;
+            margin: 2rem auto 4rem;
+            max-width: 600px;
+        }
+
+        .start-button-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            padding: 1.5rem 4rem;
+            border-radius: 60px;
+            color: #0c0c0c;
+            font-weight: 800;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 20px 50px rgba(0, 255, 136, 0.4);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            animation: pulse-glow 3s infinite;
+        }
+
+        .start-button-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .start-button-primary:hover::before {
+            left: 100%;
+        }
+
+        .start-button-primary:hover {
+            transform: translateY(-10px) scale(1.08);
+            box-shadow: 0 30px 70px rgba(0, 255, 136, 0.6);
+            animation: none;
+        }
+
+        .start-button-primary:active {
+            transform: translateY(-6px) scale(1.05);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 20px 50px rgba(0, 255, 136, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 25px 60px rgba(0, 255, 136, 0.6);
+                transform: scale(1.02);
+            }
+        }
+
+        .start-button-primary .button-icon {
+            font-size: 1.8rem;
+            animation: rocket-bounce 2s infinite;
+        }
+
+        .start-button-primary .button-text {
+            font-weight: 900;
+            position: relative;
+            z-index: 2;
+        }
+
+        .start-button-primary .button-arrow {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .start-button-primary:hover .button-arrow {
+            transform: translateX(8px);
+        }
+
+        @keyframes rocket-bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(0deg); }
+            40% { transform: translateY(-4px) rotate(-5deg); }
+            60% { transform: translateY(-2px) rotate(3deg); }
+        }
+
+        .cta-hint {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Exam Sections Layout */
+        .exam-section {
+            width: 100%;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .section-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-badge.coming-soon {
+            background: linear-gradient(45deg, #ffa500, #ff8c00);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .section-badge.upcoming {
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .exams-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            justify-items: stretch;
+            align-items: start;
+        }
+
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 3rem;
+            justify-items: center;
+        }
+
+        .exam-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 380px;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Expandable Card Styles */
+        .expandable-card {
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .expandable-card.expanded {
+            grid-column: 1 / -1;
+            max-width: 100%;
+            min-height: auto;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 136, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 255, 136, 0.2);
+            margin: 1rem 0;
+            z-index: 10;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .expand-icon {
+            font-size: 1.2rem;
+            color: #00ff88;
+            transition: transform 0.3s ease;
+            margin-left: auto;
+        }
+
+        .expandable-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .exam-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1rem;
+        }
+
+        .exam-details.expanded {
+            max-height: 1000px;
+        }
+
+        .details-content {
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(0, 255, 136, 0.2);
+            text-align: left;
+        }
+
+        .details-content h4 {
+            color: #00ff88;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .details-content h5 {
+            color: #00d4ff;
+            font-size: 1.1rem;
+            margin: 1.5rem 0 1rem 0;
+            font-weight: 600;
+        }
+
+        .details-content p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .exam-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .exam-stats .stat-item {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 0.8rem;
+            border-radius: 10px;
+            border-left: 3px solid #00ff88;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #00ff88;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 0.9rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .syllabus-preview {
+            background: rgba(0, 212, 255, 0.05);
+            padding: 1.2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            margin: 1.5rem 0;
+        }
+
+        .subject-topics {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .topic-group {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .topic-group strong {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .exam-tips {
+            background: rgba(255, 165, 0, 0.05);
+            padding: 1.2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 165, 0, 0.2);
+            margin: 1.5rem 0;
+        }
+
+        .exam-tips ul {
+            list-style: none;
+            padding: 0;
+            margin: 0.8rem 0 0 0;
+        }
+
+        .exam-tips li {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .exam-tips li::before {
+            content: '💡';
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .exam-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .exam-card:hover::before {
+            left: 100%;
+        }
+
+        .exam-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #00ff88;
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
+        }
+
+        .exam-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .exam-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .exam-description {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .exam-deadline {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 10px;
+            border-left: 3px solid #00ff88;
+        }
+
+        .deadline-label {
+            font-size: 0.8rem;
+            color: #00ff88;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .countdown {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: block;
+        }
+
+        .countdown.urgent {
+            color: #ff6b6b;
+            animation: pulse-text 1s infinite;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pyq-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            text-decoration: none;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .pyq-link:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .pyq-unavailable {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 165, 0, 0.1);
+            color: #ffa500;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+        }
+
+        /* Fake Card Styling */
+        .fake-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 0, 0, 0.05));
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            animation: pulse-red 2s infinite;
+        }
+
+        .fake-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.4);
+            border-color: rgba(255, 107, 107, 0.6);
+        }
+
+        .fake-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 700;
+            animation: bounce 1s infinite;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 10px 30px rgba(255, 107, 107, 0.2); }
+            50% { box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+
+        /* Enhanced CTA Section */
+        .cta-section {
+            width: 100%;
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.05), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #00ff88, #00d4ff, #ff0080);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .cta-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        .start-button-enhanced {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            padding: 1.2rem 3rem;
+            border-radius: 60px;
+            color: #0c0c0c;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .start-button-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .start-button-enhanced:hover::before {
+            left: 100%;
+        }
+
+        .start-button-enhanced:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 25px 60px rgba(0, 255, 136, 0.5);
+        }
+
+        .start-button-enhanced:active {
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .button-icon {
+            font-size: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        .button-text {
+            font-weight: 800;
+            position: relative;
+            z-index: 2;
+        }
+
+        .button-arrow {
+            font-size: 1.3rem;
+            transition: transform 0.3s ease;
+        }
+
+        .start-button-enhanced:hover .button-arrow {
+            transform: translateX(5px);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-3px); }
+            60% { transform: translateY(-2px); }
+        }
+
+        .cta-features {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.5));
+        }
+
+        /* Legacy button styles for compatibility */
+        .start-button {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            color: #0c0c0c;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .start-button:active {
+            transform: translateY(-2px);
+        }
+
+        .selected-exam {
+            border: 2px solid #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+        }
+
+        /* Disabled card styles */
+        .exam-card.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .exam-card.disabled:hover {
+            transform: none;
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+
+        .coming-soon-overlay,
+        .upcoming-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #ffa500;
+            border-radius: 20px;
+            z-index: 2;
+        }
+
+        .upcoming-overlay {
+            color: #ff6b6b;
+        }
+
+        /* Enhanced card structure */
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .exam-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .countdown-container {
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .countdown-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #00ff88;
+            line-height: 1;
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .exam-subjects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 0.8rem 0;
+        }
+
+        .subject-tag {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .pyq-section {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .exams-container,
+            .exam-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .exam-section {
+                margin: 2rem auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-center {
+                order: 3;
+            }
+            
+            .nav-menu {
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .study-timer-modern {
+                padding: 0.8rem 1rem;
+                gap: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .timer-time {
+                font-size: 1.2rem;
+            }
+            
+            .container {
+                padding: 12rem 1rem 2rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .exams-container,
+            .exam-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .exam-card {
+                padding: 1.5rem;
+                max-width: 100%;
+                min-height: 250px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .exam-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .countdown-container {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exam-card {
+                padding: 1.2rem;
+                min-height: 220px;
+            }
+            
+            .exam-icon {
+                font-size: 2.5rem;
+            }
+            
+            .exam-title {
+                font-size: 1.3rem;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 255, 136, 0.3);
+            border-top: 4px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Fake Popup Styling */
+        .fake-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .fake-popup-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid rgba(255, 107, 107, 0.5);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.3);
+        }
+
+        .fake-popup h3 {
+            color: #ff6b6b;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+
+        .fake-popup p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: #ffffff;
+        }
+
+        .fake-popup-close {
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fake-popup-close:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+    
+    <!-- Navigation Header -->
+    <nav class="nav-header">
+        <div class="nav-logo">PrepDyno</div>
+        <div class="nav-center">
+            <!-- Modern Study Timer -->
+            <div class="study-timer-modern" id="studyTimer">
+                <div class="timer-display">
+                    <div class="timer-icon">📚</div>
+                    <div class="timer-time" id="timerDisplay">00:00:00</div>
+                </div>
+                <div class="timer-controls">
+                    <button class="timer-btn play" id="playBtn" onclick="startTimer()">▶</button>
+                    <button class="timer-btn pause" id="pauseBtn" onclick="pauseTimer()" style="display: none;">⏸</button>
+                    <button class="timer-btn stop" onclick="resetTimer()">⏹</button>
+                </div>
+                <div class="timer-stats">
+                    <span class="stat-item">Today: <span id="todayTime">0h 0m</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <!-- Dynamic Auth Section -->
+            <div id="authSection" class="auth-section">
+                <!-- Shown when user is NOT logged in -->
+                <div id="loggedOutSection" class="auth-buttons">
+                    <a href="#" class="nav-btn" onclick="handleLogin()">🔐 Login</a>
+                </div>
+                
+                <!-- Shown when user IS logged in -->
+                <div id="loggedInSection" class="auth-buttons" style="display: none;">
+                    <div class="user-info-nav" onclick="handleProfile()">
+                        <img id="userAvatar" class="user-avatar-nav" src="" alt="User" style="display: none;">
+                        <div id="userInitials" class="user-initials-nav"></div>
+                        <span id="userName" class="user-name-nav">User</span>
+                    </div>
+                    <a href="#" class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</a>
+                </div>
+            </div>
+            
+            <a href="/stats" class="nav-btn" onclick="handleStats()">📊 Stats</a>
+            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Leaderboard')">🏆 Leaderboard</a>
+            <a href="#" class="nav-btn upcoming" onclick="showUpcoming('Test')">📝 Test</a>
+            <a href="#" class="nav-btn primary upcoming" onclick="showUpcoming('Practice')">💪 Practice</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1 class="logo">PrepDyno</h1>
+        <p class="tagline">The Future of Competitive Exam Preparation</p>
+        
+        <!-- Primary CTA Button - More Visible -->
+        <div class="primary-cta">
+            <a href="/start-journey" class="start-button-primary" id="primaryStartButton">
+                <span class="button-icon">🚀</span>
+                <span class="button-text">Start Your Journey</span>
+                <span class="button-arrow">→</span>
+            </a>
+            <p class="cta-hint">Choose your exam and begin tracking your progress instantly</p>
+        </div>
+        
+        <!-- Competitive Exams Section -->
+        <div class="exam-section">
+            <div class="section-header">
+                <h2 class="section-title">🎯 Competitive Exams</h2>
+                <span class="section-badge">Available Now</span>
+            </div>
+            <div class="exams-container">
+                <div class="exam-card expandable-card" onclick="toggleExamDetails('jee-advanced')">
+                    <div class="card-header">
+                        <span class="exam-icon">⚛️</span>
+                        <h3 class="exam-title">JEE Advanced</h3>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <p class="exam-description">Joint Entrance Examination Advanced for IITs</p>
+                    <div class="exam-deadline">
+                        <span class="deadline-label">JEE Advanced 2026:</span>
+                        <span class="countdown">288 days left</span>
+                    </div>
+                    <a href="https://jeeadv.ac.in/" target="_blank" class="pyq-link" onclick="event.stopPropagation();">
+                        📄 Previous Year Papers
+                    </a>
+                    
+                    <!-- Expandable Details -->
+                    <div class="exam-details" id="jee-advanced-details">
+                        <div class="details-content">
+                            <h4>🎯 About JEE Advanced</h4>
+                            <p>JEE Advanced is the gateway to India's premier engineering institutes - the IITs. It's the second stage of the JEE examination process.</p>
+                            
+                            <div class="exam-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Eligibility:</span>
+                                    <span class="stat-value">Top 2.5 lakh JEE Main qualifiers</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Duration:</span>
+                                    <span class="stat-value">6 hours (2 papers of 3 hours each)</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Subjects:</span>
+                                    <span class="stat-value">Physics, Chemistry, Mathematics</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Seats:</span>
+                                    <span class="stat-value">~17,000 across all IITs</span>
+                                </div>
+                            </div>
+                            
+                            <div class="syllabus-preview">
+                                <h5>📚 Syllabus Highlights</h5>
+                                <div class="subject-topics">
+                                    <div class="topic-group">
+                                        <strong>Physics:</strong> Mechanics, Thermodynamics, Electromagnetism, Optics, Modern Physics
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Chemistry:</strong> Physical, Organic, Inorganic Chemistry
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Mathematics:</strong> Algebra, Calculus, Coordinate Geometry, Trigonometry
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="exam-tips">
+                                <h5>💡 Success Tips</h5>
+                                <ul>
+                                    <li>Focus on conceptual understanding over rote learning</li>
+                                    <li>Practice previous year questions extensively</li>
+                                    <li>Time management is crucial - practice with mock tests</li>
+                                    <li>Master problem-solving techniques for complex questions</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exam-card expandable-card" onclick="toggleExamDetails('neet')">
+                    <div class="card-header">
+                        <span class="exam-icon">🧬</span>
+                        <h3 class="exam-title">NEET</h3>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <p class="exam-description">National Eligibility cum Entrance Test for medical colleges</p>
+                    <div class="exam-deadline">
+                        <span class="deadline-label">NEET-UG 2026:</span>
+                        <span class="countdown">274 days left</span>
+                    </div>
+                    <a href="https://mystudycart.com/aipmt-past-year-papers-free-download" target="_blank" class="pyq-link" onclick="event.stopPropagation();">
+                        📄 Previous Year Papers
+                    </a>
+                    
+                    <!-- Expandable Details -->
+                    <div class="exam-details" id="neet-details">
+                        <div class="details-content">
+                            <h4>🎯 About NEET</h4>
+                            <p>NEET is the single entrance examination for admission to medical and dental colleges across India. It's your gateway to becoming a doctor.</p>
+                            
+                            <div class="exam-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Eligibility:</span>
+                                    <span class="stat-value">12th pass with Physics, Chemistry, Biology</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Duration:</span>
+                                    <span class="stat-value">3 hours 20 minutes</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Questions:</span>
+                                    <span class="stat-value">180 questions (45 each subject)</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Seats:</span>
+                                    <span class="stat-value">~90,000 MBBS seats nationwide</span>
+                                </div>
+                            </div>
+                            
+                            <div class="syllabus-preview">
+                                <h5>📚 Syllabus Highlights</h5>
+                                <div class="subject-topics">
+                                    <div class="topic-group">
+                                        <strong>Physics:</strong> Mechanics, Thermodynamics, Optics, Modern Physics, Electrodynamics
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Chemistry:</strong> Physical, Organic, Inorganic Chemistry
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Biology:</strong> Botany, Zoology, Human Physiology, Genetics, Ecology
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="exam-tips">
+                                <h5>💡 Success Tips</h5>
+                                <ul>
+                                    <li>Biology carries maximum weightage - focus heavily on it</li>
+                                    <li>NCERT books are your best friends for NEET preparation</li>
+                                    <li>Practice diagrams and biological processes regularly</li>
+                                    <li>Solve previous year questions to understand patterns</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exam-card expandable-card" onclick="toggleExamDetails('iat')">
+                    <div class="card-header">
+                        <span class="exam-icon">🚀</span>
+                        <h3 class="exam-title">IAT</h3>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <p class="exam-description">Indian Institute of Space Science and Technology Aptitude Test</p>
+                    <div class="exam-deadline">
+                        <span class="deadline-label">IAT 2026:</span>
+                        <span class="countdown">259 days left</span>
+                    </div>
+                    <a href="https://iiseradmission.in/downloads/" target="_blank" class="pyq-link" onclick="event.stopPropagation();">
+                        📄 Previous Year Papers
+                    </a>
+                    
+                    <!-- Expandable Details -->
+                    <div class="exam-details" id="iat-details">
+                        <div class="details-content">
+                            <h4>🎯 About IAT</h4>
+                            <p>IAT is the entrance exam for admission to Indian Institute of Space Science and Technology (IIST) and IISERs. Perfect for space science enthusiasts!</p>
+                            
+                            <div class="exam-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Eligibility:</span>
+                                    <span class="stat-value">12th pass with Physics, Chemistry, Mathematics</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Duration:</span>
+                                    <span class="stat-value">3 hours</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Subjects:</span>
+                                    <span class="stat-value">Physics, Chemistry, Mathematics, Biology</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Institutes:</span>
+                                    <span class="stat-value">IIST + 7 IISERs</span>
+                                </div>
+                            </div>
+                            
+                            <div class="syllabus-preview">
+                                <h5>📚 Syllabus Highlights</h5>
+                                <div class="subject-topics">
+                                    <div class="topic-group">
+                                        <strong>Physics:</strong> Mechanics, Waves, Thermodynamics, Electromagnetism, Modern Physics
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Chemistry:</strong> Physical, Organic, Inorganic Chemistry
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Mathematics:</strong> Algebra, Calculus, Coordinate Geometry, Statistics
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Biology:</strong> Cell Biology, Genetics, Ecology, Evolution (for some programs)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="exam-tips">
+                                <h5>💡 Success Tips</h5>
+                                <ul>
+                                    <li>Strong foundation in JEE Main syllabus is essential</li>
+                                    <li>Focus on application-based problems in science</li>
+                                    <li>Practice interdisciplinary questions</li>
+                                    <li>Space science knowledge gives an edge</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exam-card expandable-card" onclick="toggleExamDetails('ugee')">
+                    <div class="card-header">
+                        <span class="exam-icon">💡</span>
+                        <h3 class="exam-title">UGEE</h3>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <p class="exam-description">Undergraduate Engineering Entrance Examination</p>
+                    <div class="exam-deadline">
+                        <span class="deadline-label">UGEE 2026:</span>
+                        <span class="countdown">260 days left</span>
+                    </div>
+                    <div class="pyq-unavailable">
+                        ⚠️ No Official PYQ Available
+                    </div>
+                    
+                    <!-- Expandable Details -->
+                    <div class="exam-details" id="ugee-details">
+                        <div class="details-content">
+                            <h4>🎯 About UGEE</h4>
+                            <p>UGEE is a comprehensive undergraduate engineering entrance examination for various engineering colleges and specialized programs.</p>
+                            
+                            <div class="exam-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Eligibility:</span>
+                                    <span class="stat-value">12th pass with Physics, Chemistry, Mathematics</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Duration:</span>
+                                    <span class="stat-value">3 hours</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Subjects:</span>
+                                    <span class="stat-value">Mathematics, Physics, Research Aptitude</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Focus:</span>
+                                    <span class="stat-value">Engineering & Research Programs</span>
+                                </div>
+                            </div>
+                            
+                            <div class="syllabus-preview">
+                                <h5>📚 Syllabus Highlights</h5>
+                                <div class="subject-topics">
+                                    <div class="topic-group">
+                                        <strong>Mathematics:</strong> Calculus, Algebra, Coordinate Geometry, Probability
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Physics:</strong> Mechanics, Electromagnetism, Modern Physics, Thermodynamics
+                                    </div>
+                                    <div class="topic-group">
+                                        <strong>Research Aptitude:</strong> Logical Reasoning, Data Analysis, Scientific Method
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="exam-tips">
+                                <h5>💡 Success Tips</h5>
+                                <ul>
+                                    <li>Strong mathematical foundation is crucial</li>
+                                    <li>Develop analytical and logical thinking skills</li>
+                                    <li>Practice research methodology questions</li>
+                                    <li>Focus on problem-solving techniques</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exam-card fake-card" onclick="showJeeMainsPopup()">
+                    <span class="exam-icon">📚</span>
+                    <h3 class="exam-title">JEE Mains</h3>
+                    <p class="exam-description">Joint Entrance Examination - Mains</p>
+                    <div class="exam-deadline">
+                        <span class="deadline-label">JEE Mains 2026:</span>
+                        <span class="countdown">245 days left</span>
+                    </div>
+                    <a href="#" class="pyq-link" onclick="event.stopPropagation(); showJeeMainsPopup();">
+                        📄 Previous Year Papers
+                    </a>
+                </div>
+            </div>    
+
+            </div>
+        </div>
+        <!-- Board Exams Section -->
+        <div class="exam-section">
+            <div class="section-header">
+                <h2 class="section-title">📖 Board Exams (CBSE)</h2>
+                <span class="section-badge coming-soon">Coming Soon</span>
+            </div>
+            <div class="exams-container">
+                <div class="exam-card disabled" data-exam="Class 12 CBSE">
+                    <div class="coming-soon-overlay">Coming Soon</div>
+                    <div class="exam-header">
+                        <div class="exam-icon">🎓</div>
+                        <div class="countdown-container">
+                            <div class="countdown-number">Soon</div>
+                            <div class="countdown-label">Available</div>
+                        </div>
+                    </div>
+                    <div class="exam-info">
+                        <h3 class="exam-title">Class 12 CBSE</h3>
+                        <p class="exam-description">Central Board of Secondary Education</p>
+                        <div class="exam-subjects">
+                            <span class="subject-tag">Physics</span>
+                            <span class="subject-tag">Chemistry</span>
+                            <span class="subject-tag">Mathematics</span>
+                            <span class="subject-tag">Biology</span>
+                        </div>
+                        <div class="pyq-section">
+                            <a href="#" class="pyq-link" onclick="event.stopPropagation(); showUpcoming('Class 12 CBSE');">📄 Notify Me</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-card disabled" data-exam="Class 11 CBSE">
+                    <div class="coming-soon-overlay">Coming Soon</div>
+                    <div class="exam-header">
+                        <div class="exam-icon">📚</div>
+                        <div class="countdown-container">
+                            <div class="countdown-number">Soon</div>
+                            <div class="countdown-label">Available</div>
+                        </div>
+                    </div>
+                    <div class="exam-info">
+                        <h3 class="exam-title">Class 11 CBSE</h3>
+                        <p class="exam-description">Central Board of Secondary Education</p>
+                        <div class="exam-subjects">
+                            <span class="subject-tag">Physics</span>
+                            <span class="subject-tag">Chemistry</span>
+                            <span class="subject-tag">Mathematics</span>
+                            <span class="subject-tag">Biology</span>
+                        </div>
+                        <div class="pyq-section">
+                            <a href="#" class="pyq-link" onclick="event.stopPropagation(); showUpcoming('Class 11 CBSE');">📄 Notify Me</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-card disabled" data-exam="Class 10 CBSE">
+                    <div class="coming-soon-overlay">Coming Soon</div>
+                    <div class="exam-header">
+                        <div class="exam-icon">🔢</div>
+                        <div class="countdown-container">
+                            <div class="countdown-number">Soon</div>
+                            <div class="countdown-label">Available</div>
+                        </div>
+                    </div>
+                    <div class="exam-info">
+                        <h3 class="exam-title">Class 10 CBSE</h3>
+                        <p class="exam-description">Central Board of Secondary Education</p>
+                        <div class="exam-subjects">
+                            <span class="subject-tag">Mathematics</span>
+                            <span class="subject-tag">Science</span>
+                            <span class="subject-tag">Social Science</span>
+                        </div>
+                        <div class="pyq-section">
+                            <a href="#" class="pyq-link" onclick="event.stopPropagation(); showUpcoming('Class 10 CBSE');">📄 Notify Me</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Government Exams Section -->
+        <div class="exam-section">
+            <div class="section-header">
+                <h2 class="section-title">🏛️ Government Exams</h2>
+                <span class="section-badge upcoming">Upcoming</span>
+            </div>
+            <div class="exams-container">
+                <div class="exam-card disabled" data-exam="UPSC CSE">
+                    <div class="upcoming-overlay">Upcoming</div>
+                    <div class="exam-header">
+                        <div class="exam-icon">🏛️</div>
+                        <div class="countdown-container">
+                            <div class="countdown-number">2024</div>
+                            <div class="countdown-label">Coming</div>
+                        </div>
+                    </div>
+                    <div class="exam-info">
+                        <h3 class="exam-title">UPSC CSE</h3>
+                        <p class="exam-description">Civil Services Examination</p>
+                        <div class="exam-subjects">
+                            <span class="subject-tag">General Studies</span>
+                            <span class="subject-tag">Optional</span>
+                            <span class="subject-tag">Essay</span>
+                        </div>
+                        <div class="pyq-section">
+                            <a href="#" class="pyq-link" onclick="event.stopPropagation(); showUpcoming('UPSC CSE');">📄 Notify Me</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-card disabled" data-exam="Banking Exams">
+                    <div class="upcoming-overlay">Upcoming</div>
+                    <div class="exam-header">
+                        <div class="exam-icon">🏦</div>
+                        <div class="countdown-container">
+                            <div class="countdown-number">2024</div>
+                            <div class="countdown-label">Coming</div>
+                        </div>
+                    </div>
+                    <div class="exam-info">
+                        <h3 class="exam-title">Banking Exams</h3>
+                        <p class="exam-description">IBPS, SBI, RBI Exams</p>
+                        <div class="exam-subjects">
+                            <span class="subject-tag">Reasoning</span>
+                            <span class="subject-tag">Quantitative</span>
+                            <span class="subject-tag">English</span>
+                        </div>
+                        <div class="pyq-section">
+                            <a href="#" class="pyq-link" onclick="event.stopPropagation(); showUpcoming('Banking Exams');">📄 Notify Me</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-card disabled" data-exam="SSC Exams">
+                    <div class="upcoming-overlay">Upcoming</div>
+                    <div class="exam-header">
+                        <div class="exam-icon">📋</div>
+                        <div class="countdown-container">
+                            <div class="countdown-number">2024</div>
+                            <div class="countdown-label">Coming</div>
+                        </div>
+                    </div>
+                    <div class="exam-info">
+                        <h3 class="exam-title">SSC Exams</h3>
+                        <p class="exam-description">CGL, CHSL, MTS, GD</p>
+                        <div class="exam-subjects">
+                            <span class="subject-tag">General Intelligence</span>
+                            <span class="subject-tag">Quantitative</span>
+                            <span class="subject-tag">English</span>
+                        </div>
+                        <div class="pyq-section">
+                            <a href="#" class="pyq-link" onclick="event.stopPropagation(); showUpcoming('SSC Exams');">📄 Notify Me</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="exam-card fake-card" data-exam="FAKE" onclick="showFakeExamPopup()">
+                    <span class="exam-icon">💀</span>
+                    <h3 class="exam-title">JEE Mains</h3>
+                    <p class="exam-description">For those who think third time's the charm... 💀</p>
+                    <div class="fake-badge">CLICK ME</div>
+                    <div class="exam-deadline">
+                        <span class="deadline-label">JEE Mains 2026:</span>
+                        <span class="countdown urgent">Why even bother? 😂</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call to Action Section -->
+        <div class="cta-section">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Begin Your Success Story?</h2>
+                <p class="cta-subtitle">Join thousands of students who are already on their path to success</p>
+                <a href="/start-journey" class="start-button-enhanced" id="startButton">
+                    <span class="button-icon">🚀</span>
+                    <span class="button-text">Start Your Journey</span>
+                    <span class="button-arrow">→</span>
+                </a>
+                <div class="cta-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span>Track Progress</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🎯</span>
+                        <span>Smart Goals</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span>Fast Results</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Powered by AI • Built for Success
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Fake Exam Popup -->
+    <div class="fake-popup" id="fakePopup">
+        <div class="fake-popup-content">
+            <h3>🤔 Are you a Double Dropper??</h3>
+            <p>
+                Then what the f**k are you clicking on JEE Mains for? 😂<br><br>
+                <strong>Ahhh understood...</strong> You just messed up your whole year! 💀<br><br>
+                Go for <strong>JEE Advanced</strong> mate, that's where the real challenge is! 🚀<br><br>
+                But hey, at least you found the secret easter egg! 🥚✨<br>
+                Now go back to studying like a responsible student! 📚
+            </p>
+            <button class="fake-popup-close" onclick="closeFakeExamPopup()">I Promise to Study JEE Advanced! 😅</button>
+        </div>
+    </div>
+
+    <script>
+        // Global timer variables
+        let timerInterval;
+        let startTime;
+        let elapsedTime = 0;
+        let isRunning = false;
+        let todayStudyTime = 0;
+
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Timer functionality
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatTimeShort(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+
+        function updateTimerDisplay() {
+            const currentTime = isRunning ? elapsedTime + Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
+            document.getElementById('timerDisplay').textContent = formatTime(currentTime);
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                startTime = Date.now();
+                isRunning = true;
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+                
+                // Update button visibility
+                document.getElementById('playBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'flex';
+            }
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                elapsedTime += Math.floor((Date.now() - startTime) / 1000);
+                isRunning = false;
+                clearInterval(timerInterval);
+                
+                // Update button visibility
+                document.getElementById('playBtn').style.display = 'flex';
+                document.getElementById('pauseBtn').style.display = 'none';
+                
+                // Save study time
+                saveStudyTime();
+            }
+        }
+
+        function resetTimer() {
+            if (isRunning) {
+                elapsedTime += Math.floor((Date.now() - startTime) / 1000);
+                saveStudyTime();
+            }
+            
+            isRunning = false;
+            elapsedTime = 0;
+            clearInterval(timerInterval);
+            
+            // Reset display and buttons
+            document.getElementById('timerDisplay').textContent = '00:00:00';
+            document.getElementById('playBtn').style.display = 'flex';
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function saveStudyTime() {
+            const currentTime = isRunning ? elapsedTime + Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
+            const today = new Date().toDateString();
+            
+            // Get existing study time data
+            const studyData = JSON.parse(localStorage.getItem('studyTimeData') || '{}');
+            
+            // Add current session time to today's total
+            studyData[today] = (studyData[today] || 0) + currentTime;
+            
+            // Clean up old data (keep only last 30 days)
+            const thirtyDaysAgo = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)).toDateString();
+            Object.keys(studyData).forEach(date => {
+                if (new Date(date) < new Date(thirtyDaysAgo)) {
+                    delete studyData[date];
+                }
+            });
+            
+            // Save updated data
+            localStorage.setItem('studyTimeData', JSON.stringify(studyData));
+            
+            // Reset for next session
+            elapsedTime = 0;
+        }
+
+        function updateStudyStats() {
+            const today = new Date().toDateString();
+            const studyData = JSON.parse(localStorage.getItem('studyTimeData') || '{}');
+            const todayTime = studyData[today] || 0;
+            
+            // Add current session time if timer is running
+            const currentSessionTime = isRunning ? Math.floor((Date.now() - startTime) / 1000) : 0;
+            const totalTodayTime = todayTime + elapsedTime + currentSessionTime;
+            
+            document.getElementById('todayTime').textContent = formatTimeShort(totalTodayTime);
+        }
+
+        // Check and update navigation based on login status
+        function updateNavigationUI() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            const loggedOutSection = document.getElementById('loggedOutSection');
+            const loggedInSection = document.getElementById('loggedInSection');
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is logged in
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                
+                // Hide logged out section, show logged in section
+                loggedOutSection.style.display = 'none';
+                loggedInSection.style.display = 'flex';
+                
+                // Update user info
+                const userName = document.getElementById('userName');
+                const userInitials = document.getElementById('userInitials');
+                const userAvatar = document.getElementById('userAvatar');
+                
+                const displayName = userData.displayName || userData.email?.split('@')[0] || 'User';
+                userName.textContent = displayName;
+                
+                // Set user avatar or initials
+                if (userData.photoURL) {
+                    userAvatar.src = userData.photoURL;
+                    userAvatar.style.display = 'block';
+                    userInitials.style.display = 'none';
+                } else {
+                    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                    userInitials.textContent = initials;
+                    userInitials.style.display = 'flex';
+                    userAvatar.style.display = 'none';
+                }
+            } else {
+                // User is not logged in or session expired
+                loggedOutSection.style.display = 'flex';
+                loggedInSection.style.display = 'none';
+                
+                // Clear expired session
+                if (userSession === 'true' && sessionExpiry && currentTime >= parseInt(sessionExpiry)) {
+                    localStorage.removeItem('userSession');
+                    localStorage.removeItem('sessionExpiry');
+                    localStorage.removeItem('userData');
+                }
+            }
+        }
+
+        // Navigation functions
+        function handleLogin() {
+            // Check if user is already logged in
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is already logged in, go to profile instead
+                window.location.href = '/profile';
+            } else {
+                // User not logged in, go to login page
+                window.location.href = '/login';
+            }
+        }
+
+        function handleProfile() {
+            // Check if user is logged in
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is logged in, go to profile
+                window.location.href = '/profile';
+            } else {
+                // User not logged in, redirect to login
+                alert('Please login first to access your profile.');
+                window.location.href = '/login';
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear all session data
+                localStorage.removeItem('userSession');
+                localStorage.removeItem('sessionExpiry');
+                localStorage.removeItem('userData');
+                
+                // Update navigation UI
+                updateNavigationUI();
+                
+                // Show success message
+                alert('You have been logged out successfully!');
+                
+                // Optional: redirect to home or login page
+                // window.location.reload();
+            }
+        }
+
+        function handleStats() {
+            // Check if user is logged in
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (userSession === 'true' && sessionExpiry && currentTime < parseInt(sessionExpiry)) {
+                // User is logged in, go to stats
+                window.location.href = '/stats';
+            } else {
+                // User not logged in, redirect to login
+                alert('Please login first to access your stats.');
+                window.location.href = '/login';
+            }
+        }
+
+        function showUpcoming(feature) {
+            const messages = {
+                'Leaderboard': 'Compete with other students! Leaderboard feature coming soon.',
+                'Test': 'Take practice tests and mock exams! Test feature coming soon.',
+                'Practice': 'Practice with thousands of questions! Practice feature coming soon.'
+            };
+            alert(messages[feature] || `${feature} feature is coming soon! Stay tuned for updates.`);
+        }
+
+        // Fake exam popup functions
+        function showFakeExamPopup() {
+            const popup = document.getElementById('fakePopup');
+            popup.style.display = 'flex';
+            
+            // Add some fun effects
+            setTimeout(() => {
+                const content = popup.querySelector('.fake-popup-content');
+                content.style.animation = 'popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            }, 100);
+        }
+
+        function closeFakeExamPopup() {
+            const popup = document.getElementById('fakePopup');
+            popup.style.display = 'none';
+            
+            // Show a little encouragement message
+            setTimeout(() => {
+                alert('Good choice! Now focus on JEE Advanced! 💪🚀');
+            }, 300);
+        }
+
+        // Expandable Exam Cards Functionality
+        function toggleExamDetails(examId) {
+            const card = document.querySelector(`[onclick="toggleExamDetails('${examId}')"]`);
+            const details = document.getElementById(`${examId}-details`);
+            
+            if (!card || !details) return;
+            
+            const isExpanded = card.classList.contains('expanded');
+            
+            // Close all other expanded cards first
+            document.querySelectorAll('.expandable-card.expanded').forEach(expandedCard => {
+                if (expandedCard !== card) {
+                    expandedCard.classList.remove('expanded');
+                    const expandedDetails = expandedCard.querySelector('.exam-details');
+                    if (expandedDetails) {
+                        expandedDetails.classList.remove('expanded');
+                    }
+                }
+            });
+            
+            // Toggle current card
+            if (isExpanded) {
+                card.classList.remove('expanded');
+                details.classList.remove('expanded');
+            } else {
+                card.classList.add('expanded');
+                details.classList.add('expanded');
+                
+                // Smooth scroll to the expanded card
+                setTimeout(() => {
+                    card.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }, 100);
+            }
+        }
+
+        // Exam selection functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            updateStudyStats();
+            updateNavigationUI(); // Update navigation based on login status
+            
+            const examCards = document.querySelectorAll('.exam-card');
+            const selectedExamInput = document.getElementById('selectedExam');
+            const startButton = document.getElementById('startButton');
+            const examForm = document.getElementById('examForm');
+            const loading = document.getElementById('loading');
+            
+            examCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove selection from all cards
+                    examCards.forEach(c => {
+                        c.classList.remove('selected-exam');
+                        c.style.transform = 'translateY(0) scale(1)';
+                    });
+                    
+                    // Add selection to clicked card
+                    this.classList.add('selected-exam');
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                    
+                    // Set the exam value
+                    const examType = this.getAttribute('data-exam');
+                    selectedExamInput.value = examType;
+                    
+                    // Enable start button with animation
+                    startButton.disabled = false;
+                    startButton.style.opacity = '1';
+                    startButton.style.transform = 'translateY(0)';
+                });
+                
+                // Enhanced hover effects
+                card.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('selected-exam')) {
+                        this.style.transform = 'translateY(-5px) scale(1.01)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected-exam')) {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    }
+                });
+            });
+            
+            // Form submission with authentication check
+            function handleFormSubmission(event) {
+                event.preventDefault();
+                
+                // Check if user is logged in
+                const userSession = localStorage.getItem('userSession');
+                const sessionExpiry = localStorage.getItem('sessionExpiry');
+                const currentTime = new Date().getTime();
+                
+                if (!userSession || userSession !== 'true' || !sessionExpiry || currentTime >= parseInt(sessionExpiry)) {
+                    // User is not logged in
+                    alert('Please login first to start your exam preparation journey!');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                // Check if an exam is selected
+                const selectedExam = document.querySelector('input[name="exam"]').value;
+                if (!selectedExam || selectedExam === 'FAKE') {
+                    alert('Please select a valid exam first!');
+                    return;
+                }
+                
+                // User is logged in and exam is selected, redirect to dashboard
+                window.location.href = '/dashboard';
+            }
+
+            // Show upcoming feature messages
+            function showUpcoming(feature) {
+                const messages = {
+                    'Class 12 CBSE': 'CBSE Class 12 tracking coming soon! Get ready for comprehensive board exam preparation. 📚',
+                    'Class 11 CBSE': 'CBSE Class 11 tracking coming soon! Build a strong foundation for your future. 🎯',
+                    'Class 10 CBSE': 'CBSE Class 10 tracking coming soon! Excel in your board exams with our guidance. 🏆',
+                    'UPSC CSE': 'UPSC Civil Services preparation coming soon! Dream big, prepare smart. 🌟',
+                    'Banking Exams': 'Banking exam preparation coming soon! Secure your financial career. 💼',
+                    'SSC Exams': 'SSC exam preparation coming soon! Your government job awaits. 🎖️'
+                };
+                alert(messages[feature] || `${feature} feature is coming soon! Stay tuned for updates. 🚀`);
+            }
+
+            examForm.addEventListener('submit', handleFormSubmission);
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !startButton.disabled) {
+                    examForm.submit();
+                }
+                
+                // Timer shortcuts
+                if (e.key === ' ' && e.ctrlKey) {
+                    e.preventDefault();
+                    if (isRunning) {
+                        pauseTimer();
+                    } else {
+                        startTimer();
+                    }
+                }
+            });
+        });
+
+        // Auto-save timer on page unload
+        window.addEventListener('beforeunload', function() {
+            if (isRunning) {
+                elapsedTime += Math.floor((Date.now() - startTime) / 1000);
+                saveStudyTime();
+            }
+        });
+    </script>
+</body>
+</html>

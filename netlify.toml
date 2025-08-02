@@ -1,0 +1,19 @@
+[build]
+  publish = "static"
+  command = "echo 'No build command needed for Flask app'"
+
+[build.environment]
+  PYTHON_VERSION = "3.9"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+
+[context.production.environment]
+  FLASK_ENV = "production"
+  FLASK_DEBUG = "false"
+
+[functions]
+  directory = "netlify/functions"

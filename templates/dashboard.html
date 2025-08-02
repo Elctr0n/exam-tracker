@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PrepDyno</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
+        }
+
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0c0c0c;
+        }
+
+        .logout-btn {
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.5);
+            color: #ff3b30;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .main-content {
+            padding: 120px 2rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .exam-section {
+            margin-bottom: 4rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .section-badge {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .exams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .exam-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .exam-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .exam-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .exam-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .exam-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #0c0c0c;
+            border-color: transparent;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+    
+    <nav class="nav-header">
+        <a href="/" class="nav-logo">PrepDyno</a>
+        <div class="nav-menu">
+            <a href="/" class="nav-btn">🏠 Home</a>
+            <a href="/stats" class="nav-btn">📊 Stats</a>
+            <a href="/profile" class="nav-btn">👤 Profile</a>
+        </div>
+        <div class="user-section" id="userSection">
+            <div class="user-avatar" id="userAvatar">👤</div>
+            <span id="userName">User</span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Your Exam Dashboard</h1>
+            <p class="dashboard-subtitle">Continue your preparation journey or explore new exams</p>
+        </div>
+
+        <div class="exam-section">
+            <div class="section-header">
+                <h2 class="section-title">🎯 Available Exams</h2>
+                <span class="section-badge">Ready to Track</span>
+            </div>
+            <div class="exams-grid">
+                <div class="exam-card" onclick="startExamTracking('JEE')">
+                    <div class="exam-icon">⚛️</div>
+                    <div class="exam-title">JEE</div>
+                    <div class="exam-subtitle">Joint Entrance Examination</div>
+                    <div class="exam-actions">
+                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('JEE')">Start Tracking</a>
+                    </div>
+                </div>
+
+                <div class="exam-card" onclick="startExamTracking('NEET')">
+                    <div class="exam-icon">🧬</div>
+                    <div class="exam-title">NEET-UG</div>
+                    <div class="exam-subtitle">National Eligibility cum Entrance Test</div>
+                    <div class="exam-actions">
+                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('NEET')">Start Tracking</a>
+                    </div>
+                </div>
+
+                <div class="exam-card" onclick="startExamTracking('IAT')">
+                    <div class="exam-icon">🚀</div>
+                    <div class="exam-title">IAT</div>
+                    <div class="exam-subtitle">Indian Institute of Space Science and Technology Aptitude Test</div>
+                    <div class="exam-actions">
+                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('IAT')">Start Tracking</a>
+                    </div>
+                </div>
+
+                <div class="exam-card" onclick="startExamTracking('UGEE')">
+                    <div class="exam-icon">💡</div>
+                    <div class="exam-title">UGEE</div>
+                    <div class="exam-subtitle">Undergraduate Entrance Examination</div>
+                    <div class="exam-actions">
+                        <a href="#" class="action-btn primary" onclick="event.stopPropagation(); startExamTracking('UGEE')">Start Tracking</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function loadDashboard() {
+            const userSession = localStorage.getItem('userSession');
+            const sessionExpiry = localStorage.getItem('sessionExpiry');
+            const currentTime = new Date().getTime();
+            
+            if (!userSession || userSession !== 'true' || !sessionExpiry || currentTime >= parseInt(sessionExpiry)) {
+                alert('Please login first to access your dashboard!');
+                window.location.href = '/login';
+                return;
+            }
+
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            if (userData.displayName) {
+                document.getElementById('userName').textContent = userData.displayName;
+            }
+            if (userData.photoURL) {
+                document.getElementById('userAvatar').innerHTML = `<img src="${userData.photoURL}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
+            } else if (userData.displayName) {
+                document.getElementById('userAvatar').textContent = userData.displayName.charAt(0).toUpperCase();
+            }
+            
+            // Check if user has already selected an exam
+            checkUserExamSelection(userData.uid);
+        }
+        
+        function checkUserExamSelection(userId) {
+            if (!userId) {
+                console.log('No user ID available');
+                return;
+            }
+            
+            fetch('/get-user-exam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.has_selected_exam) {
+                    // User has already selected an exam, redirect to tracker
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 1000); // Small delay to show dashboard briefly
+                    
+                    // Update dashboard to show "Redirecting to your exam..."
+                    document.querySelector('.dashboard-subtitle').innerHTML = 
+                        `Redirecting to your ${data.selected_exam} preparation... <div style="margin-top: 10px;"><div class="loading-spinner"></div></div>`;
+                }
+                // If no exam selected, user stays on dashboard to select
+            })
+            .catch(error => {
+                console.error('Error checking user exam:', error);
+            });
+        }
+
+        function startExamTracking(exam) {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const userId = userData.uid;
+            
+            if (!userId) {
+                alert('Please login first!');
+                window.location.href = '/login';
+                return;
+            }
+            
+            // Save exam selection for this user
+            fetch('/select-exam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    user_id: userId, 
+                    exam: exam 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message and redirect
+                    alert(data.message);
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Error selecting exam: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error selecting exam:', error);
+                alert('Error selecting exam. Please try again.');
+            });
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('userSession');
+                localStorage.removeItem('sessionExpiry');
+                localStorage.removeItem('userData');
+                alert('Logged out successfully!');
+                window.location.href = '/login';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>
