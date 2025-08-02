@@ -413,6 +413,7 @@
 
         <form method="POST" action="{{ url_for('save_progress') }}" id="progressForm">
             <input type="hidden" name="exam" value="{{ exam }}">
+            <input type="hidden" name="user_id" id="userIdInput">
             
             <div class="subjects-grid" id="subjectsGrid">
                 {% for subject, chapters in data.items() %}
@@ -599,6 +600,20 @@
             // Check authentication before loading tracker
             if (!checkAuthentication()) {
                 return; // Stop execution if not authenticated
+            }
+            
+            // Set user_id from localStorage for form submission
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    const userIdInput = document.getElementById('userIdInput');
+                    if (userIdInput && user.uid) {
+                        userIdInput.value = user.uid;
+                    }
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
             }
             
             updateProgress();
