@@ -35,7 +35,13 @@ class DatabaseManager:
             except Exception as e:
                 print(f"❌ PostgreSQL connection failed: {e}")
                 # In production (Railway), don't fall back to SQLite - raise the error
-                if os.environ.get('RAILWAY_ENVIRONMENT'):
+                is_railway = any([
+                    os.environ.get('RAILWAY_ENVIRONMENT'),
+                    os.environ.get('RAILWAY_PROJECT_ID'),
+                    os.environ.get('RAILWAY_SERVICE_ID'),
+                    os.environ.get('PORT')  # Railway always sets PORT
+                ])
+                if is_railway:
                     print("🚨 Running in Railway - SQLite fallback disabled")
                     raise Exception(f"PostgreSQL connection required in production: {e}")
                 else:
@@ -43,7 +49,15 @@ class DatabaseManager:
                     self.init_sqlite()
         else:
             # Only use SQLite for local development
-            if os.environ.get('RAILWAY_ENVIRONMENT'):
+            is_railway = any([
+                os.environ.get('RAILWAY_ENVIRONMENT'),
+                os.environ.get('RAILWAY_PROJECT_ID'),
+                os.environ.get('RAILWAY_SERVICE_ID'),
+                os.environ.get('PORT')  # Railway always sets PORT
+            ])
+            if is_railway:
+                print(f"🚨 Railway detected but DATABASE_URL not found!")
+                print(f"Available env vars: {[k for k in os.environ.keys() if 'DATABASE' in k or 'POSTGRES' in k]}")
                 raise Exception("DATABASE_URL not found in Railway environment")
             else:
                 print("🔧 Using SQLite for local development")
