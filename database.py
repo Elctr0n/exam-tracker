@@ -24,10 +24,10 @@ class DatabaseManager:
         )
         print(f"🔍 Found database_url: {database_url[:50] if database_url else 'None'}...")
         
-        # Fallback: Use hardcoded Railway internal URL if no env var found
+        # Fallback: Use hardcoded Railway external URL if no env var found
         if not database_url:
-            database_url = "postgresql://postgres:pHeoIiCbCtdGVKEuSSyOFnLHQRGXAFdB@postgres.railway.internal:5432/railway"
-            print("🔧 Using hardcoded Railway internal DATABASE_URL as fallback")
+            database_url = "postgresql://postgres:pHeoIiCbCtdGVKEuSSyOFnLHQRGXAFdB@gondola.proxy.rlwy.net:49565/railway"
+            print("🔧 Using hardcoded Railway external DATABASE_URL as fallback")
         
         if database_url:
             try:
